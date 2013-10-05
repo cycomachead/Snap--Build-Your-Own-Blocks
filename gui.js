@@ -181,7 +181,7 @@ function IDE_Morph(isAutoFill) {
 
 IDE_Morph.prototype.init = function (isAutoFill) {
     // global font setting
-    MorphicPreferences.globalFontFamily = 'Helvetica, Arial';
+    MorphicPreferences.globalFontFamily = 'Helvetica Neue, Helvetica, Arial';
 
     // restore saved user preferences
     this.userLanguage = null; // user language preference for startup
@@ -3215,7 +3215,7 @@ IDE_Morph.prototype.languageMenu = function () {
 
 IDE_Morph.prototype.setLanguage = function (lang, callback) {
     var translation = document.getElementById('language'),
-        src = 'lang-' + lang + '.js',
+        src = 'lang/lang-' + lang + '.js',
         myself = this;
     SnapTranslator.unload();
     if (translation) {
