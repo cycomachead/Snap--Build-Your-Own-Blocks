@@ -1,0 +1,32 @@
+{% macro render_create_account_field(field) %}
+  <label> {{ field.label }} </label>
+  <dd>{{ field(type_="text", class_="input_xlarge")|safe }}
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  </dd>
+{% endmacro %}
+
+
+{% macro render_signup_field(field) %}
+
+<div class="control-group">
+  <!-- Username -->
+  <label class="control-label"  for="username">{{field.label}}</label>
+  <div class="controls">
+    <dd>{{ field(type_="text", class_="input_xlarge")|safe }}
+      {% if field.errors %}
+      <ul class=errors>
+        {% for error in field.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </dd>
+</div>
+{% endmacro %}
+ 

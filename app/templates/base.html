@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>Snap Files</title>
+    
+        <link rel="stylesheet" text="text/css" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+        <link rel="stylesheet" text="text/css" href="{{ url_for('static', filename='css/bootsnipp.css') }}">
+
+
+        {% block header %}
+        {% endblock %}
+    </head>
+    <form method="post" action="/logout" id="tab">
+
+                            <li><input type="submit" value="logout">
+                            </li>
+    </form>
+    <div class="navbar navbar-inverse">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="#" name="top">Snap Files</a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav">
+                            <li><a href="#"><i class="icon-home icon-white"></i> Run Snap</a></li>
+                            <li class="divider-vertical"></li>
+                            <li class="active"><a href="#"><i class="icon-file icon-white"></i> Pages</a></li>
+                            <li class="divider-vertical"></li>
+                            <li><a href="#"><i class="icon-envelope icon-white"></i> Messages</a></li>
+                            <li class="divider-vertical"></li>
+                            <li><a href="#"><i class="icon-signal icon-white"></i> Stats</a></li>
+                            <li class="divider-vertical"></li>
+                        </ul>
+                        <div class="btn-group pull-right">
+                            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                                <i class="icon-user"></i> admin <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <!-- <li><a href="#"><i class="icon-wrench"></i> Settings</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#"><i class="icon-share"></i> Logout</a></li> -->
+                            </ul>
+                        </div>
+                    </div>
+                    <!--/.nav-collapse -->
+                </div>
+                <!--/.container-fluid -->
+            </div>
+            <!--/.navbar-inner -->
+        </div>
+        <!--/.navbar -->
+
+    <body>
+
+    {% block content %}
+    {% endblock %}
+
+    </body>
+     <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+     <script src="{{ url_for('static', filename='js/tab.js') }}"></script>
+</html>

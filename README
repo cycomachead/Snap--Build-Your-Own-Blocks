@@ -1,0 +1,10 @@
+=====Set up======
+1. Install flask --> pip install flask
+2. Install requirements --> pip install -r requirements.txt
+
+=====Initialize DB====
+python init_db.py 
+
+=====Run Local Server=====
+python run.py ---> Open browser to 0.0.0.0:5000/create 
+
