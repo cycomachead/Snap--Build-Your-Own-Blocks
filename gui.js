@@ -6092,26 +6092,82 @@ IDE_Morph.prototype.reportNewBug = function () {
     frame.addContents(text);
 
     dialog.ok = function () {
-        // Fix for Safari name... assuming no one uses netscape today...
+        max_len = 65536; // Max GH Issue length
+        // Fix for Safari name
         app = (navigator.appName === "Netscape" ? "Safari" : navigator.appName);
-        postGitIssue( email.children[0].children[0].text,
-                      (text.text + appendDetails(true)),
-                      [ app,
-                        navigator.platform,
-                        navigator.vendor, ]
-                      );
+        details = appendDetails(true);
+        content = text.text + details[0];
+        xml = details[1];
+        // post initial comment details to GH
+        issue = postGitIssue(
+            email.children[0].children[0].text,
+            content.slice(0, max_len),
+            [ app, navigator.platform, navigator.vendor ],
+            null
+        );
+
+        // Check response for the issue number
+        num = 0;
+        try {
+            num = JSON.parse(issue.response)["number"];
+        } catch (err) {
+            console.log(err)
+            console.log(issue);
+            num = 0;
+        }
+
+        if (num != 0) {
+            // add any additional comments to the issue
+            for (var i = max_len; i < content.length; i += max_len) {
+                postGitIssue(null, content.slice(i, i + max_len), null, num);
+            }
+            // Add XML as new, separate comments, in chunks if necessary.
+            for (var i = 0; i < xml.length; i += max_len) {
+                postGitIssue(null, xml.slice(i, i + max_len), null, num);
+            }
+        }
+
         ok.call(this);
     };
-    
+
+    function exportProject(name, plain) {
+        var menu, str,
+        ide = world.children[0];
+        if (name) {
+            ide.setProjectName(name);
+            if (Process.prototype.isCatchingErrors) {
+                try {
+                    //menu = ide.showMessage('Exporting');
+                    str = encodeURIComponent(
+                    ide.serializer.serialize(ide.stage)
+                    );
+                    return ('data:text/'
+                        + (plain ? 'plain,' + str : 'xml,' + str));
+                } catch (err) {
+                    str = "ERROR GETTING PROJECT";
+                    str += "\n\n" + err;
+                }
+            } else {
+                //menu = ide.showMessage('Exporting');
+                str = encodeURIComponent(
+                ide.serializer.serialize(this.stage)
+                );
+                return ('data:text/'
+                    + (plain ? 'plain,' + str : 'xml,' + str));
+            }
+        }
+    }
+
     var appendDetails = function(getProj) {
         var str = "No Project",
             br  = "\n\n=================\n";
-            
+
         if (getProj) {
             try {
-                str = ide.serializer.serialize(ide.stage);
+                str = exportProject();
             } catch(err) {
                 str = "ERROR GETTING PROJECT";
+                str += "\n\n" + err;
             }
         }
 
@@ -6124,11 +6180,11 @@ IDE_Morph.prototype.reportNewBug = function () {
         info += ("Submission Time:\t" + Date());
         info += "";
         info += br;
-        info += str;
-        return info;
+        return [info, str];
     }
 
     dialog.justDropped = function () {
+        email.edit();
         text.edit();
     };
 
@@ -6156,17 +6212,25 @@ IDE_Morph.prototype.reportNewBug = function () {
 };
 
 // Creates an issue on github with TITLE and BODY and LABELS
-var postGitIssue = function(title, body, labels) {
+var postGitIssue = function(title, body, labels, issuenum) {
     var GH_URL = "https://api.github.com/repos/cs10/snapinex/issues";
-    
-    var jsonData = { "title" : title,
-                    "body" : body,
-                    "labels" : labels };
 
+    var jsonData = { "body" : body };
+
+    // if an issue number is provided submit a comment to that issue.
+    if (issuenum !== null) {
+        GH_URL += "/" + issuenum + "/comments ";
+    } else {
+        jsonData["title"] = title;
+        jsonData["labels"] = labels;
+    }
+
+    resp = 0;
     xhr = new XMLHttpRequest();
     xhr.open("POST", GH_URL, true);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader('Authorization',
         'Basic c25hcGluYXRvcjokbmFwJnVncyE/NDA5Ng=='); //GH token
     xhr.send(JSON.stringify(jsonData));
+    return xhr;
 };
