@@ -1680,7 +1680,9 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         blocks.push(watcherToggle('getLastAnswer'));
         blocks.push(block('getLastAnswer'));
         blocks.push('-');
+        blocks.push(watcherToggle('reportMouseX'));
         blocks.push(block('reportMouseX'));
+        blocks.push(watcherToggle('reportMouseY'));
         blocks.push(block('reportMouseY'));
         blocks.push(block('reportMouseDown'));
         blocks.push('-');
@@ -3046,6 +3048,22 @@ SpriteMorph.prototype.getLastAnswer = function () {
     return this.parentThatIsA(StageMorph).lastAnswer;
 };
 
+SpriteMorph.prototype.reportMouseX = function () {
+    var stage = this.parentThatIsA(StageMorph);
+    if (stage) {
+        return stage.reportMouseX();
+    }
+    return 0;
+};
+
+SpriteMorph.prototype.reportMouseY = function () {
+    var stage = this.parentThatIsA(StageMorph);
+    if (stage) {
+        return stage.reportMouseY);
+    }
+    return 0;
+};
+
 // SpriteMorph variable watchers (for palette checkbox toggling)
 
 SpriteMorph.prototype.findVariableWatcher = function (varName) {
@@ -3270,7 +3288,6 @@ SpriteMorph.prototype.allEditorBlockInstances = function (definition) {
     });
     return inBlockEditors;
 };
-
 
 SpriteMorph.prototype.paletteBlockInstance = function (definition) {
     var ide = this.parentThatIsA(IDE_Morph);
@@ -3916,6 +3933,24 @@ StageMorph.prototype.watchers = function (leftPos) {
     });
 };
 
+// StageMorph Mouse Corridnates
+
+StageMorph.prototype.reportMouseX = function () {
+   var world = this.world();
+    if (world) {
+        return (world.hand.position().x - this.center().x) / this.scale;
+    }
+    return 0;
+};
+
+StageMorph.prototype.reportMouseY = function () {
+    var world = this.world();
+    if (world) {
+        return (this.center().y - world.hand.position().y) / this.scale;
+    }
+    return 0;
+};
+
 // StageMorph timer
 
 StageMorph.prototype.resetTimer = function () {
@@ -4337,7 +4372,9 @@ StageMorph.prototype.blockTemplates = function (category) {
         blocks.push(watcherToggle('getLastAnswer'));
         blocks.push(block('getLastAnswer'));
         blocks.push('-');
+        blocks.push(watcherToggle('reportMouseX'));
         blocks.push(block('reportMouseX'));
+        blocks.push(watcherToggle('reportMouseY'));
         blocks.push(block('reportMouseY'));
         blocks.push(block('reportMouseDown'));
         blocks.push('-');
@@ -5995,7 +6032,8 @@ WatcherMorph.prototype.object = function () {
 
 WatcherMorph.prototype.isGlobal = function (selector) {
     return contains(
-        ['getTimer', 'getLastAnswer', 'getTempo', 'getLastMessage'],
+        ['getLastAnswer', 'getLastMessage', 'getTempo', 'getTimer',
+            'reportMouseX', 'reportMouseY'],
         selector
     );
 };
