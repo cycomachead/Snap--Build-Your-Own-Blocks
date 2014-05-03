@@ -4764,11 +4764,12 @@ StageMorph.prototype.userMenu = function () {
     menu.addItem(
         "pic...",
         function () {
-            var image = myself.fullImageClassic().toDataURL().(/^data:image\/[^;]/, 'data:application/octet-stream');
+            console.log("hello");
+            var image = myself.fullImageClassic().toDataURL().replace(/^data:image\/[^;]/, 'data:application/octet-stream');
             var downloadLink = document.createElement("a");
             downloadLink.download = 'download.png';
-            link.href = image;
-            link.click();
+            downloadLink.href = image;
+            downloadLink.click();
         },
         'open a new window\nwith a picture of the stage'
     );
