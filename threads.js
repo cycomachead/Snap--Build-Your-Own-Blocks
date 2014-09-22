@@ -2457,6 +2457,29 @@ Process.prototype.reportAttributeOf = function (attribute, name) {
     return '';
 };
 
+// OOP-Style blocks for accessing Objects and attributes
+Process.prototype.reportObject = function (obj) {
+	var thisObj = this.blockReceiver(),
+		stage, otherObj;
+	
+    stage = thisObj.parentThatIsA(StageMorph);
+	
+	switch (this.inputOption(obj)) {
+	case 'Stage':
+		return stage;
+	case 'myself':
+		return thisObj;
+	case 'all sprites':
+		return thisObj.parentThatIsA(IDE_Morph).sprites;
+	default: // return a sprite (or stage) by name
+	    if (stage.name === obj) {
+			return stage;
+	    } else {
+			return this.getOtherObject(obj, thisObj, stage);
+	    }
+	}
+}
+
 Process.prototype.reportContextFor = function (context, otherObj) {
     // Private - return a copy of the context
     // and bind it to another receiver

@@ -891,6 +891,14 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                 true
             );
             break;
+        case '%objectsMenu': // A OOP Objects menu
+            part = new InputSlotMorph(
+                null,
+                false,
+                'extendedObjectsMenu',
+                true
+            );
+            break;
         case '%col': // collision detection
             part = new InputSlotMorph(
                 null,
@@ -6654,6 +6662,31 @@ InputSlotMorph.prototype.objectsMenu = function () {
             allNames.push(morph.name);
         }
     });
+    if (allNames.length > 0) {
+        dict['~'] = null;
+        allNames.forEach(function (name) {
+            dict[name] = name;
+        });
+    }
+    return dict;
+};
+
+InputSlotMorph.prototype.extendedObjectsMenu = function () {
+    var rcvr = this.parentThatIsA(BlockMorph).receiver(),
+        stage = rcvr.parentThatIsA(StageMorph),
+        dict = {},
+        allNames = [];
+
+    dict[stage.name] = stage.name;
+    stage.children.forEach(function (morph) {
+        if (morph instanceof SpriteMorph) {
+            allNames.push(morph.name);
+        }
+    });
+	
+	dict['myself'] = ['myself'];
+	dict['all sprites'] = ['all sprites'];
+	
     if (allNames.length > 0) {
         dict['~'] = null;
         allNames.forEach(function (name) {
