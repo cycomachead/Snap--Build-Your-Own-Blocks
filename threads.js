@@ -90,6 +90,11 @@ var Process;
 var Context;
 var VariableFrame;
 
+// http://stackoverflow.com/a/1830844/126977
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 function snapEquals(a, b) {
     if (a instanceof List || (b instanceof List)) {
         if (a instanceof List && (b instanceof List)) {
@@ -98,16 +103,11 @@ function snapEquals(a, b) {
         return false;
     }
 
-    var x = +a,
-        y = +b,
-        specials = [true, false, ''];
-
-    // check for special values before coercing to numbers
-    if (isNaN(x) || isNaN(y) ||
-            [a, b].some(function (any) {return contains(specials, any) ||
-                  (isString(any) && (any.indexOf(' ') > -1)); })) {
-        x = a;
+    var x = a,
         y = b;
+    if(isNumeric(a) && isNumeric(b)) {
+        x = parseFloat(a);
+        y = parseFloat(b);
     }
 
     // handle text comparision case-insensitive.
@@ -152,6 +152,7 @@ ThreadManager.prototype.startProcess = function (
     newProc = new Process(block.topBlock());
     newProc.exportResult = exportResult;
     this.processes.push(newProc);
+    clickstream.log("startProcess", {blockId: block.topBlock().blockID});
     return newProc;
 };
 
@@ -162,6 +163,7 @@ ThreadManager.prototype.stopAll = function (excpt) {
             proc.stop();
         }
     });
+    clickstream.log("stopAll");
 };
 
 ThreadManager.prototype.stopAllForReceiver = function (rcvr, excpt) {
@@ -204,6 +206,7 @@ ThreadManager.prototype.resumeAll = function (stage) {
     if (stage) {
         stage.resumeAllActiveSounds();
     }
+    clickstream.log("resumeAll");
 };
 
 ThreadManager.prototype.step = function () {
@@ -686,13 +689,32 @@ Process.prototype.handleError = function (error, element) {
     this.stop();
     this.errorFlag = true;
     this.topBlock.addErrorHighlight();
-    if (isNil(m) || isNil(m.world())) {m = this.topBlock; }
-    m.showBubble(
-        (m === element ? '' : 'Inside: ')
-            + error.name
-            + '\n'
-            + error.message
-    );
+
+    if(element && element.world()) {
+        element.showBubble(error.name + '\n' + error.message);
+    } else {
+        // The root of a custom block is not the world, so needs to be handled
+        // slightly specially. Also attach an image of the failing block to
+        // help in debugging.
+        var errorMorph = new AlignmentMorph('row');
+        var value = error.name + '\n' + error.message;
+        var txt  = value.length > 500 ? value.slice(0, 500) + '...' : value;
+        errorMorph.add(new TextMorph(
+            txt,
+            this.topBlock.fontSize
+        ));
+
+        var img = element.fullImage();
+        var morphToShow = new Morph();
+        morphToShow.silentSetWidth(img.width);
+        morphToShow.silentSetHeight(img.height);
+        morphToShow.image = img;
+        errorMorph.add(morphToShow);
+
+        errorMorph.drawNew();
+        errorMorph.fixLayout();
+        this.topBlock.showBubble(errorMorph);
+    }
 };
 
 // Process Lambda primitives
@@ -1235,6 +1257,56 @@ Process.prototype.reportCDR = function (list) {
 
 Process.prototype.doAddToList = function (element, list) {
     list.add(element);
+};
+
+Process.prototype.doConcatToList = function (l, list) {
+    list.becomeArray();
+    l.becomeArray();
+    list.contents = list.contents.concat(l.contents);
+};
+
+Process.prototype.getRandomFromList = function (l) {
+    var idx = Math.floor(Math.random() * l.length()) + 1;
+    // Handle any accidental mis-rounding; should be rare: "on the order of one
+    // in 2^62" according to
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random)
+    return l.at(Math.min(idx, l.length()));
+}
+
+function snapClone(o, memo) {
+    memo = memo || new Map();
+
+    if(memo.has(o)) {
+        return memo.get(o);
+    }
+
+    if(o instanceof List) {
+        var c = new List(o.asArray().map(snapClone, memo));
+        memo.set(o, c);
+        return c;
+    } else if(o instanceof Map) {
+        var l = [];
+        o.forEach(function(v, k) {
+            l.push([snapClone(k, memo), snapClone(v, memo)]);
+        });
+        var c = new Map(l);
+        memo.set(o, c);
+        return c;
+    } else if(typeof o == "number" || typeof o == "string" || typeof o == "boolean") {
+        return o;
+    } else {
+        throw new Error("Encountered object of unknown type.");
+    }
+}
+
+Process.prototype.getClone = function (l) {
+    return snapClone(l);
+}
+
+Process.prototype.doListJoin = function (a, b) {
+    a.becomeArray();
+    b.becomeArray();
+    return new List(a.contents.concat(b.contents));
 };
 
 Process.prototype.doDeleteFromList = function (index, list) {

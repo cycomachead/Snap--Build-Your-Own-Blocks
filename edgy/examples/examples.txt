@@ -1,0 +1,14 @@
+Breadth-first search
+Critical path algorithm
+K7
+MCST
+Shortening
+Sierpinski
+Topological sort
+Most popular
+Slow max-flow
+Fast max-flow
+Roads - Melbourne CBD, Coburg, Dandenong
+TSP heuristics via MCST
+TMDB browser
+Tic-Tac-Toe

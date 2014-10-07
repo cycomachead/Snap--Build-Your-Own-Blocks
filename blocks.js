@@ -734,6 +734,12 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
             part.isStatic = true;
             part.canBeEmpty = false;
             break;
+        case '%expL':
+            part = new MultiArgMorph('%l', null, 0);
+            part.addInput();
+            part.isStatic = true;
+            part.canBeEmpty = false;
+            break;
         case '%br':
             part = new Morph();
             part.setExtent(new Point(0, 0));
@@ -920,6 +926,14 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                 null,
                 false,
                 'costumesMenu',
+                true
+            );
+            break;
+        case '%cst2':
+            part = new InputSlotMorph(
+                null,
+                false,
+                'costumesMenu2',
                 true
             );
             break;
@@ -1117,6 +1131,33 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                 null,
                 false,
                 'getVarNamesDict',
+                true
+            );
+            part.isStatic = true;
+            break;
+        case '%nodeAttr':
+            part = new InputSlotMorph(
+                null,
+                false,
+                'getNodeAttrsDict',
+                true
+            );
+            part.isStatic = true;
+            break;
+        case '%edgeAttr':
+            part = new InputSlotMorph(
+                null,
+                false,
+                'getEdgeAttrsDict',
+                true
+            );
+            part.isStatic = true;
+            break;
+        case '%ascdesc':
+            part = new InputSlotMorph(
+                null,
+                false,
+                {ascending: 'ascending', descending: 'descending'},
                 true
             );
             part.isStatic = true;
@@ -1899,6 +1940,10 @@ BlockMorph.prototype.init = function () {
 
     BlockMorph.uber.init.call(this);
     this.color = new Color(0, 17, 173);
+
+    if(window.clickstream) {
+        this.blockID = clickstream.nextID("block");
+    }
 };
 
 BlockMorph.prototype.receiver = function () {
@@ -2968,6 +3013,11 @@ BlockMorph.prototype.fixChildrensBlockColor = function (isForced) {
 
 BlockMorph.prototype.setCategory = function (aString) {
     this.category = aString;
+    if(!SpriteMorph.prototype.blockColor[this.category]) {
+        // Uh oh. There block definition has a nonexistent category specified.
+        // Put it under variables by default to avoid crashing horribly.
+        this.category = "variables";
+    }
     this.startLayout();
     this.fixBlockColor();
     this.endLayout();
@@ -2991,6 +3041,8 @@ BlockMorph.prototype.fullCopy = function () {
         //block.comment = null;
 
     });
+    ans.blockID = clickstream.nextID("block");
+    clickstream.log("newBlock", {id: ans.blockID, selector: ans.selector, spec: ans.blockSpec});
     return ans;
 };
 
@@ -3128,6 +3180,9 @@ BlockMorph.prototype.destroy = function () {
         comment.destroy();
     });
     BlockMorph.uber.destroy.call(this);
+    if(this.blockID !== undefined) {
+        clickstream.log("destroyBlock", {id: this.blockID});
+    }
 };
 
 BlockMorph.prototype.stackHeight = function () {
@@ -3214,6 +3269,7 @@ CommandBlockMorph.prototype.nextBlock = function (block) {
         if (affected) {
             affected.fixLayout();
         }
+        clickstream.log("appendBlock", {id: this.blockID, target: block.blockID});
     } else {
         return detect(
             this.children,
@@ -3357,6 +3413,7 @@ CommandBlockMorph.prototype.snap = function () {
         this.fixBlockColor();
         this.endLayout();
         CommandBlockMorph.uber.snap.call(this); // align stuck comments
+        clickstream.log("dropBlock", {id: this.blockID});
         return;
     }
 
@@ -4054,7 +4111,24 @@ ReporterBlockMorph.prototype.snap = function (hand) {
     scripts.lastDroppedBlock = this;
 
     target = scripts.closestInput(this, hand);
-    if (target !== null) {
+    if (target === null) {
+        clickstream.log("dropBlock", {id: this.blockID});
+    } else {
+        if(target.parent instanceof MultiArgMorph) {
+            clickstream.log("setBlockInput", {
+                id: target.parent.blockID,
+                num: target.parentThatIsA(BlockMorph).inputs().indexOf(target.parent),
+                subnum: target.parent.inputs().indexOf(target),
+                block: this.blockID
+            });
+        } else {
+            clickstream.log("setBlockInput", {
+                id: target.parent.blockID,
+                num: target.parentThatIsA(BlockMorph).inputs().indexOf(target),
+                block: this.blockID
+            });
+        }
+
         scripts.lastReplacedInput = target;
         scripts.lastDropTarget = target.parent;
         if (target instanceof MultiArgMorph) {
@@ -5375,6 +5449,7 @@ CommandSlotMorph.prototype.nestedBlock = function (block) {
             block.bottomBlock().nextBlock(nb);
         }
         this.fixLayout();
+        clickstream.log("nestBlock", {id: this.parent.blockID, target: block.blockID});
     } else {
         return detect(
             this.children,
@@ -6916,7 +6991,22 @@ InputSlotMorph.prototype.reactToKeystroke = function () {
 };
 
 InputSlotMorph.prototype.reactToEdit = function () {
-    this.contents().clearSelection();
+    var cnts = this.contents()
+    cnts.clearSelection();
+    if(this.parent instanceof MultiArgMorph) {
+        clickstream.log("setBlockInput", {
+            id: this.parent.blockID,
+            num: this.parentThatIsA(BlockMorph).inputs().indexOf(this.parent),
+            subnum: this.parent.inputs().indexOf(this),
+            text: cnts.text
+        });
+    } else {
+        clickstream.log("setBlockInput", {
+            id: this.parent.blockID,
+            num: this.parentThatIsA(BlockMorph).inputs().indexOf(this),
+            text: cnts.text
+        });
+    }
 };
 
 InputSlotMorph.prototype.reactToSliderEdit = function () {

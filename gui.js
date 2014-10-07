@@ -2086,6 +2086,32 @@ IDE_Morph.prototype.settingsMenu = function () {
     }
 
     menu = new MenuMorph(this);
+    menu.addItem('Maximum visible nodes', 'setMaxVisibleNodes');
+    addPreference(
+        'Use newer layout algorithm',
+        'toggleUseWebCola',
+        (edgyLayoutAlgorithm == cola.d3adaptor),
+        'uncheck to use the default\n"D3" force-directed graph',
+        'check to use the WebCOLA\ngraph layout algorithm',
+        false
+    );
+    addPreference(
+        'Use manual layout',
+        'toggleUseManualLayout',
+        this.useManualLayout,
+        'uncheck to lay out all nodes automatically',
+        'check to lock node positions after dragging',
+        false
+    );
+    addPreference(
+        'Lay out with downward edges',
+        'toggleWebColaDownwardEdgeConstraint',
+        this.useDownwardEdgeConstraint,
+        'uncheck to remove constraints',
+        'check to add downward edge\nconstraints',
+        false
+    );
+    menu.addLine();
     menu.addItem('Language...', 'languageMenu');
     menu.addItem(
         'Zoom blocks...',
@@ -2294,6 +2320,18 @@ IDE_Morph.prototype.projectMenu = function () {
             'experimental - store this project\nin your downloads folder',
             new Color(100, 0, 0)
         );
+        menu.addItem(
+            'Export to HTML',
+            'exportToHTML',
+            'experimental - save as self-contained HTML',
+            new Color(100, 0, 0)
+        )
+        menu.addItem(
+            'Export to ZIP',
+            'exportToZIP',
+            'experimental - save as self-contained ZIP',
+            new Color(100, 0, 0)
+        )
     }
     menu.addItem('Save As...', 'saveProjectsBrowser');
     menu.addLine();
@@ -2367,7 +2405,7 @@ IDE_Morph.prototype.projectMenu = function () {
         'Import tools',
         function () {
             myself.droppedText(
-                myself.getURLsbeOrRelative(
+                myself.getURL(
                     'tools.xml'
                 ),
                 'tools'
@@ -2380,13 +2418,10 @@ IDE_Morph.prototype.projectMenu = function () {
         function () {
             // read a list of libraries from an external file,
             var libMenu = new MenuMorph(this, 'Import library'),
-                libUrl = 'http://snap.berkeley.edu/snapsource/libraries/' +
-                    'LIBRARIES';
+                libUrl = 'libraries/LIBRARIES';
 
             function loadLib(name) {
-                var url = 'http://snap.berkeley.edu/snapsource/libraries/'
-                        + name
-                        + '.xml';
+                var url = 'libraries/' + name + '.xml';
                 myself.droppedText(myself.getURL(url), name);
             }
 
@@ -2779,14 +2814,15 @@ IDE_Morph.prototype.rawSaveProject = function (name) {
     }
 };
 
-IDE_Morph.prototype.saveProjectToDisk = function () {
+IDE_Morph.prototype.saveProjectToDisk = function (plain) {
     var data,
-        link = document.createElement('a');
+        link = document.createElement('a'),
+        href = 'data:text/' + (plain ? 'plain' : 'xml') + ',';
 
     if (Process.prototype.isCatchingErrors) {
         try {
-            data = this.serializer.serialize(this.stage);
-            link.setAttribute('href', 'data:text/xml,' + data);
+            data = encodeURIComponent(this.serializer.serialize(this.stage));
+            link.setAttribute('href', href + data);
             link.setAttribute('download', this.projectName + '.xml');
             document.body.appendChild(link);
             link.click();
@@ -2795,8 +2831,8 @@ IDE_Morph.prototype.saveProjectToDisk = function () {
             this.showMessage('Saving failed: ' + err);
         }
     } else {
-        data = this.serializer.serialize(this.stage);
-        link.setAttribute('href', 'data:text/xml,' + data);
+        data = encodeURIComponent(this.serializer.serialize(this.stage));
+        link.setAttribute('href', href + data);
         link.setAttribute('download', this.projectName + '.xml');
         document.body.appendChild(link);
         link.click();
@@ -2808,31 +2844,7 @@ IDE_Morph.prototype.exportProject = function (name, plain) {
     var menu, str;
     if (name) {
         this.setProjectName(name);
-        if (Process.prototype.isCatchingErrors) {
-            try {
-                menu = this.showMessage('Exporting');
-                str = encodeURIComponent(
-                    this.serializer.serialize(this.stage)
-                );
-                location.hash = '#open:' + str;
-                window.open('data:text/'
-                    + (plain ? 'plain,' + str : 'xml,' + str));
-                menu.destroy();
-                this.showMessage('Exported!', 1);
-            } catch (err) {
-                this.showMessage('Export failed: ' + err);
-            }
-        } else {
-            menu = this.showMessage('Exporting');
-            str = encodeURIComponent(
-                this.serializer.serialize(this.stage)
-            );
-            location.hash = '#open:' + str;
-            window.open('data:text/'
-                + (plain ? 'plain,' + str : 'xml,' + str));
-            menu.destroy();
-            this.showMessage('Exported!', 1);
-        }
+        this.saveProjectToDisk(plain);
     }
 };
 
@@ -4050,7 +4062,7 @@ IDE_Morph.prototype.getURL = function (url) {
         }
         throw new Error('unable to retrieve ' + url);
     } catch (err) {
-        myself.showMessage(err);
+        myself.showMessage(err.toString());
         return;
     }
 };
@@ -4501,7 +4513,7 @@ ProjectDialogMorph.prototype.setSource = function (source) {
                 myself.nameField.setContents(item.name || '');
             }
             src = myself.ide.getURL(
-                'http://snap.berkeley.edu/snapsource/Examples/' +
+                'edgy/examples/' +
                     item.name + '.xml'
             );
 
@@ -4557,18 +4569,14 @@ ProjectDialogMorph.prototype.getExamplesProjectList = function () {
     var dir,
         projects = [];
 
-    dir = this.ide.getURL('http://snap.berkeley.edu/snapsource/Examples/');
+    dir = this.ide.getURL('edgy/examples/examples.txt');
     dir.split('\n').forEach(
         function (line) {
-            var startIdx = line.search(new RegExp('href=".*xml"')),
-                endIdx,
-                name,
-                dta;
-            if (startIdx > 0) {
-                endIdx = line.search(new RegExp('.xml'));
-                name = line.substring(startIdx + 6, endIdx);
-                dta = {
-                    name: name,
+            line = line.trim();
+            if(line.length > 0)
+            {
+                var dta = {
+                    name: line,
                     thumb: null,
                     notes: null
                 };
@@ -4677,7 +4685,7 @@ ProjectDialogMorph.prototype.openProject = function () {
         this.openCloudProject(proj);
     } else if (this.source === 'examples') {
         src = this.ide.getURL(
-            'http://snap.berkeley.edu/snapsource/Examples/' +
+            'edgy/examples/' +
                 proj.name + '.xml'
         );
         this.ide.openProjectString(src);

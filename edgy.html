@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Snap! Build Your Own Blocks. Beta</title>
+        <link rel="shortcut icon" href="k5_logo.png" type="image/gif">
+		<script type="text/javascript" src="d3.v3.js"></script>
+		<script type="text/javascript" src="cola.v2.min.js"></script>
+		<script type="text/javascript" src="jsnetworkx.js"></script>
+		<script type="text/javascript" src="morphic.js"></script>
+		<script type="text/javascript" src="widgets.js"></script>
+		<script type="text/javascript" src="blocks.js"></script>
+		<script type="text/javascript" src="threads.js"></script>
+		<script type="text/javascript" src="objects.js"></script>
+		<script type="text/javascript" src="gui.js"></script>
+		<script type="text/javascript" src="paint.js"></script>
+		<script type="text/javascript" src="lists.js"></script>
+		<script type="text/javascript" src="byob.js"></script>
+		<script type="text/javascript" src="xml.js"></script>
+		<script type="text/javascript" src="store.js"></script>
+		<script type="text/javascript" src="locale.js"></script>
+		<script type="text/javascript" src="cloud.js"></script>
+		<script type="text/javascript" src="sha512.js"></script>
+	</head>
+	<body style="margin: 0;">
+		<canvas id="world" tabindex="1" style="position: absolute;" />
+		<script type="text/javascript" src="es6-shim.js"></script>
+		<script type="text/javascript" src="edgy/changesToBlocks.js"></script>
+		<script type="text/javascript" src="edgy/changesToObjects.js"></script>
+		<script type="text/javascript" src="edgy/changesToStore.js"></script>
+		<script type="text/javascript" src="edgy/changesToGui.js"></script>
+		<script type="text/javascript" src="edgy/collections.js"></script>
+		<script type="text/javascript" src="dotparser.js"></script>
+		<script type="text/javascript" src="dotgraph.js"></script>
+		<script type="text/javascript" src="jsonp.js"></script>
+		<script type="text/javascript" src="jszip.js"></script>
+		<script type="text/javascript" src="ucsv-1.1.0.js"></script>
+		<script type="text/javascript" src="Blob.js"></script>
+		<script type="text/javascript" src="FileSaver.js"></script>
+		<script type="text/javascript" src="edgy/changesToMorphic.js"></script>
+		<script type="text/javascript" src="edgy/resigclass.js"></script>
+		<script type="text/javascript" src="edgy/clickstream.js"></script>
+		<script type="text/javascript">
+			var clickstream = new ClickstreamLogger();
+			var world = new WorldMorph(document.getElementById('world'));
+			var ide_ = new IDE_Morph();
+		</script>
+		<script type="text/javascript" id="replace-me-pre">
+		</script>
+		<script type="text/javascript">
+			ide_.openIn(world);
+		</script>
+		<script type="text/javascript" id="replace-me-post">
+		</script>
+		<script type="text/javascript">
+			setInterval(loop, 1);
+			function loop() {
+				world.doOneCycle();
+			}
+		</script>
+    </body>
+</html>

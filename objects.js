@@ -1125,6 +1125,16 @@ SpriteMorph.prototype.initBlocks = function () {
             spec: 'add %s to %l',
             defaults: [localize('thing')]
         },
+        doConcatToList : {
+            type: 'command',
+            category: 'lists',
+            spec: 'concatenate %l to %l',
+        },
+        doListJoin : {
+            type: 'reporter',
+            category: 'lists',
+            spec: '%l and %l joined',
+        },
         doDeleteFromList: {
             type: 'command',
             category: 'lists',
@@ -1142,6 +1152,16 @@ SpriteMorph.prototype.initBlocks = function () {
             category: 'lists',
             spec: 'replace item %idx of %l with %s',
             defaults: [1, null, localize('thing')]
+        },
+        getRandomFromList: {
+            type: 'reporter',
+            category: 'lists',
+            spec: 'random item from %l'
+        },
+        getClone: {
+            type: 'reporter',
+            category: 'lists',
+            spec: 'clone %l'
         },
 
         // MAP - experimental
@@ -2044,6 +2064,12 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('doDeleteFromList'));
         blocks.push(block('doInsertInList'));
         blocks.push(block('doReplaceInList'));
+        blocks.push('-');
+        blocks.push(block('doConcatToList'));
+        blocks.push(block('doListJoin'));
+        blocks.push('-');
+        blocks.push(block('getRandomFromList'));
+        blocks.push(block('getClone'));
 
     // for debugging: ///////////////
 
@@ -2154,6 +2180,8 @@ SpriteMorph.prototype.freshPalette = function (category) {
                         'reportListLength',
                         'reportListContainsItem',
                         'doAddToList',
+                        'doConcatToList',
+                        'doListJoin',
                         'doDeleteFromList',
                         'doInsertInList',
                         'doReplaceInList'
@@ -3849,27 +3877,39 @@ SpriteMorph.prototype.replaceDoubleDefinitionsFor = function (definition) {
     var doubles = this.doubleDefinitionsFor(definition),
         myself = this,
         stage,
-        ide;
+        ide,
+        doneAnything = false;
     doubles.forEach(function (double) {
         myself.allBlockInstances(double).forEach(function (block) {
             block.definition = definition;
             block.refresh();
+            doneAnything = true;
         });
     });
     if (definition.isGlobal) {
         stage = this.parentThatIsA(StageMorph);
         stage.globalBlocks = stage.globalBlocks.filter(function (def) {
-            return !contains(doubles, def);
+            var result = !contains(doubles, def);
+            if(!result) {
+                doneAnything = true;
+            }
+            return result;
         });
     } else {
         this.customBlocks = this.customBlocks.filter(function (def) {
-            return !contains(doubles, def);
+            var result = !contains(doubles, def);
+            if(!result) {
+                doneAnything = true;
+            }
+            return result;
         });
     }
-    ide = this.parentThatIsA(IDE_Morph);
-    if (ide) {
-        ide.flushPaletteCache();
-        ide.refreshPalette();
+    if (doneAnything) {
+        ide = this.parentThatIsA(IDE_Morph);
+        if (ide) {
+            ide.flushPaletteCache();
+            ide.refreshPalette();
+        }
     }
 };
 
@@ -4741,6 +4781,7 @@ StageMorph.prototype.fireGreenFlagEvent = function () {
     if (ide) {
         ide.controlBar.pauseButton.refresh();
     }
+    clickstream.log("fireGreenFlag");
     return procs;
 };
 
@@ -5148,6 +5189,13 @@ StageMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('doDeleteFromList'));
         blocks.push(block('doInsertInList'));
         blocks.push(block('doReplaceInList'));
+        blocks.push('-');
+        blocks.push(block('doConcatToList'));
+        blocks.push(block('doListJoin'));
+        blocks.push('-');
+        blocks.push(block('getRandomFromList'));
+        blocks.push(block('getClone'));
+
 
     // for debugging: ///////////////
 
@@ -5904,6 +5952,7 @@ Costume.prototype.edit = function (aWorld, anIDE, isnew, oncancel, onsubmit) {
         function (img, rc) {
             myself.contents = img;
             myself.rotationCenter = rc;
+            myself.loaded = true;
             if (anIDE.currentSprite instanceof SpriteMorph) {
                 // don't shrinkwrap stage costumes
                 myself.shrinkWrap();
