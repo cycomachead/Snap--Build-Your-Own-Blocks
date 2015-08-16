@@ -521,12 +521,6 @@ SpriteMorph.prototype.initBlocks = function () {
             category: 'pen',
             spec: 'set pen color to %clr'
         },
-        getPenColor: {
-            only: SpriteMorph,
-            type: 'reporter',
-            category: 'pen',
-            spec: 'pen color'
-        },
         changeHue: {
             only: SpriteMorph,
             type: 'command',
@@ -1872,9 +1866,6 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('setSize'));
         blocks.push('-');
         blocks.push(block('doStamp'));
-        blocks.push('-');
-        blocks.push(watcherToggle('getPenColor'));
-        blocks.push(block('getPenColor'));
         blocks.push('-')
         blocks.push(block('colorFromPicker'));
         blocks.push(block('colorFromPickerAsList'));
@@ -2840,10 +2831,6 @@ SpriteMorph.prototype.show = function () {
 };
 
 // SpriteMorph pen color
-SpriteMorph.prototype.getPenColor = function () {
-    return this.color;
-};
-
 SpriteMorph.prototype.setColor = function (aColor) {
     var x = this.xPosition(),
         y = this.yPosition();
