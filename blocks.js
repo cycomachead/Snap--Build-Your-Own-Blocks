@@ -1143,6 +1143,14 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                 true
             );
             break;
+        case '%allAtt':
+            part = new InputSlotMorph(
+                null, // numeric?
+                false, // text?
+                'allAttributesMenu',
+                true // read-only?
+            );
+            break;
         case '%fun':
             part = new InputSlotMorph(
                 null,
@@ -6984,6 +6992,83 @@ InputSlotMorph.prototype.attributesMenu = function () {
         dict['§_def' + i] = def
     });
     */
+    return dict;
+};
+
+// Return all possible attributes for any type of object.
+// Currently ( August 16, 2015 ) this shows the same options as BYOB 3.1
+// Items such as colors, costumes, sounds, etc do not yet have attributes.
+InputSlotMorph.prototype.allAttributesMenu = function () {
+    var block = this.parentThatIsA(BlockMorph),
+        objName = block.inputs()[1].evaluate(),
+        rcvr = block.receiver(),
+        stage = rcvr.parentThatIsA(StageMorph),
+        obj,
+        dict = {},
+        varNames = [];
+
+    if (objName === stage.name) {
+        obj = stage;
+    } else {
+        obj = detect(
+            stage.children,
+            function (morph) {
+                return morph.name === objName;
+            }
+        );
+    }
+    if (!obj) {
+        return dict;
+    }
+    if (obj instanceof SpriteMorph) {
+        dict = {
+            'draggable?': ['draggable'],
+            'name': ['name'],
+            'rotation style': ['rotation style'],
+            'synchronous?': ['synchronous'],
+            '~': null,
+            'direction' : ['direction'],
+            'x position' : ['x position'],
+            'y position' : ['y position'],
+            '~~': null,
+            'costume #' : ['costume #'],
+            'costume name' : ['costume name'],
+            'costumes': ['costumes'],
+            'hidden?': ['hidden'],
+            'layer': ['layer'],
+            'size' : ['size'],
+            '~~~': null,
+            // Graphics Options
+            '~~~~': null,
+            'instrument': ['instrument'],
+            'sounds': ['sounds'],
+            'tempo': ['tempo'],
+            'volume': ['volume'],
+            '~~~~~': null, // Pen Tools
+            'pen color': ['pen color'],
+            // pen shade?
+            'pen down?': ['pen down'],
+            'pen size': ['pen size'],
+            '~~~~~~': null, // OOP Tools
+            'anchor': ['anchor'],
+            //'parent': ['parent'],
+            //'children': ['children'],
+            'parts': ['parts']
+        };
+    } else { // the stage
+        dict = {
+            'costume #' : ['costume #'],
+            'costume name' : ['costume name']
+        };
+    }
+    varNames = obj.variables.names();
+    if (varNames.length > 0) {
+        dict['~~~~~~'] = null;
+        varNames.forEach(function (name) {
+            dict[name] = name;
+        });
+    }
+
     return dict;
 };
 
