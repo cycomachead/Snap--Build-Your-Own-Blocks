@@ -70,7 +70,7 @@ SpeechBubbleMorph, ScriptFocusMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2015-September-07';
+modules.gui = '2015-July-28';
 
 // Declarations
 
@@ -5121,7 +5121,7 @@ ProjectDialogMorph.prototype.shareProject = function () {
                                     encodeURIComponent(usr.toLowerCase()) +
                                     '&ProjectName=' +
                                     encodeURIComponent(proj.ProjectName);
-                            location.hash = 'present:' + projectId;
+                            location.hash = projectId;
                         }
                     },
                     myself.ide.cloudError()
