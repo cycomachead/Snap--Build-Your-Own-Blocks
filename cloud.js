@@ -36,7 +36,7 @@ modules.cloud = '2015-January-12';
 
 var Cloud;
 var SnapCloud = new Cloud(
-    'https://snap.apps.miosoft.com/SnapCloud'
+    'https://snap.apps.miosoft.com/SnapCloudLocal'
 );
 
 // Cloud /////////////////////////////////////////////////////////////
@@ -151,7 +151,7 @@ Cloud.prototype.getPublicProject = function (
         request.open(
             "GET",
             (this.hasProtocol() ? '' : 'http://')
-                + this.url + 'Public'
+                + this.url.replace('Local', 'Public') +
                 + '?'
                 + id,
             true
@@ -181,7 +181,7 @@ Cloud.prototype.getPublicProject = function (
                 } else {
                     errorCall.call(
                         null,
-                        myself.url + 'Public',
+                        myself.url.replace('Local', 'Public'),
                         localize('could not connect to:')
                     );
                 }
