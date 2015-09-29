@@ -593,7 +593,6 @@ IDE_Morph.prototype.createControlBar = function () {
     button.labelColor = this.buttonLabelColor;
     button.contrast = this.buttonContrast;
     button.drawNew();
-    // button.hint = 'stage size\nsmall & normal';
     button.fixLayout();
     button.refresh();
     stageSizeButton = button;
@@ -625,7 +624,6 @@ IDE_Morph.prototype.createControlBar = function () {
     button.labelColor = this.buttonLabelColor;
     button.contrast = this.buttonContrast;
     button.drawNew();
-    // button.hint = 'app & edit\nmodes';
     button.fixLayout();
     button.refresh();
     appModeButton = button;
@@ -649,7 +647,6 @@ IDE_Morph.prototype.createControlBar = function () {
     button.labelColor = new Color(200, 0, 0);
     button.contrast = this.buttonContrast;
     button.drawNew();
-    // button.hint = 'stop\nevery-\nthing';
     button.fixLayout();
     stopButton = button;
     this.controlBar.add(stopButton);
@@ -679,7 +676,6 @@ IDE_Morph.prototype.createControlBar = function () {
     button.labelColor = new Color(255, 220, 0);
     button.contrast = this.buttonContrast;
     button.drawNew();
-    // button.hint = 'pause/resume\nall scripts';
     button.fixLayout();
     button.refresh();
     pauseButton = button;
@@ -703,7 +699,6 @@ IDE_Morph.prototype.createControlBar = function () {
     button.labelColor = new Color(0, 200, 0);
     button.contrast = this.buttonContrast;
     button.drawNew();
-    // button.hint = 'start green\nflag scripts';
     button.fixLayout();
     startButton = button;
     this.controlBar.add(startButton);
@@ -727,7 +722,6 @@ IDE_Morph.prototype.createControlBar = function () {
     button.labelColor = this.buttonLabelColor;
     button.contrast = this.buttonContrast;
     button.drawNew();
-    // button.hint = 'open, save, & annotate project';
     button.fixLayout();
     projectButton = button;
     this.controlBar.add(projectButton);
@@ -738,7 +732,6 @@ IDE_Morph.prototype.createControlBar = function () {
         this,
         'settingsMenu',
         new SymbolMorph('gears', 14)
-        //'\u2699'
     );
     button.corner = 12;
     button.color = colors[0];
@@ -751,7 +744,6 @@ IDE_Morph.prototype.createControlBar = function () {
     button.labelColor = this.buttonLabelColor;
     button.contrast = this.buttonContrast;
     button.drawNew();
-    // button.hint = 'edit settings';
     button.fixLayout();
     settingsButton = button;
     this.controlBar.add(settingsButton);
@@ -774,7 +766,6 @@ IDE_Morph.prototype.createControlBar = function () {
     button.labelColor = this.buttonLabelColor;
     button.contrast = this.buttonContrast;
     button.drawNew();
-    // button.hint = 'cloud operations';
     button.fixLayout();
     cloudButton = button;
     this.controlBar.add(cloudButton);
@@ -2003,7 +1994,6 @@ IDE_Morph.prototype.newSpriteName = function (name, ignoredSprite) {
 
 IDE_Morph.prototype.userMenu = function () {
     var menu = new MenuMorph(this);
-    // menu.addItem('help', 'nop');
     return menu;
 };
 
@@ -3714,10 +3704,6 @@ IDE_Morph.prototype.userSetBlocksScale = function () {
     blck.color = SpriteMorph.prototype.blockColor.operators;
     blck.setSpec(localize('blocks'));
     scrpt.bottomBlock().nextBlock(blck);
-    /*
-    blck = SpriteMorph.prototype.blockForSelector('doForever');
-    blck.inputs()[0].nestedBlock(scrpt);
-    */
 
     sample = new FrameMorph();
     sample.acceptsDrops = false;
@@ -3734,15 +3720,6 @@ IDE_Morph.prototype.userSetBlocksScale = function () {
     sample.add(shield);
 
     action = function (num) {
-    /*
-        var c;
-        blck.setScale(num);
-        blck.drawNew();
-        blck.setSpec(blck.blockSpec);
-        c = blck.inputs()[0];
-        c.setScale(num);
-        c.nestedBlock(scrpt);
-    */
         scrpt.blockSequence().forEach(function (block) {
             block.setScale(num);
             block.drawNew();
@@ -3903,11 +3880,7 @@ IDE_Morph.prototype.initializeCloud = function () {
 IDE_Morph.prototype.createCloudAccount = function () {
     var myself = this,
         world = this.world();
-/*
-    // force-logout, commented out for now:
-    delete localStorage['-snap-user'];
-    SnapCloud.clear();
-*/
+
     new DialogBoxMorph(
         null,
         function (user) {
@@ -3944,11 +3917,7 @@ IDE_Morph.prototype.createCloudAccount = function () {
 IDE_Morph.prototype.resetCloudPassword = function () {
     var myself = this,
         world = this.world();
-/*
-    // force-logout, commented out for now:
-    delete localStorage['-snap-user'];
-    SnapCloud.clear();
-*/
+
     new DialogBoxMorph(
         null,
         function (user) {
@@ -4076,7 +4045,6 @@ IDE_Morph.prototype.exportProjectMedia = function (name) {
     }
     this.serializer.isCollectingMedia = false;
     this.serializer.flushMedia();
-    // this.hasChangedMedia = false;
 };
 
 IDE_Morph.prototype.exportProjectNoMedia = function (name) {
@@ -4155,7 +4123,6 @@ IDE_Morph.prototype.exportProjectAsCloudData = function (name) {
     }
     this.serializer.isCollectingMedia = false;
     this.serializer.flushMedia();
-    // this.hasChangedMedia = false;
 };
 
 IDE_Morph.prototype.cloudAcknowledge = function () {
@@ -5430,7 +5397,6 @@ SpriteIconMorph.prototype.createRotationButton = function () {
     button.padding = 0;
     button.pressColor = button.color;
     button.drawNew();
-    // button.hint = 'rotate synchronously\nwith anchor';
     button.fixLayout();
     button.refresh();
     button.changed();
@@ -6389,13 +6355,6 @@ SoundIconMorph.prototype.audioHasEnded = function () {
 SoundIconMorph.prototype.createLabel
     = SpriteIconMorph.prototype.createLabel;
 
-// SoundIconMorph stepping
-
-/*
-SoundIconMorph.prototype.step
-    = SpriteIconMorph.prototype.step;
-*/
-
 // SoundIconMorph layout
 
 SoundIconMorph.prototype.fixLayout
@@ -6535,16 +6494,6 @@ JukeboxMorph.prototype.updateSelection = function () {
     });
     this.spriteVersion = this.sprite.version;
 };
-
-// Jukebox stepping
-
-/*
-JukeboxMorph.prototype.step = function () {
-    if (this.spriteVersion !== this.sprite.version) {
-        this.updateSelection();
-    }
-};
-*/
 
 // Jukebox ops
 
@@ -6717,4 +6666,3 @@ StageHandleMorph.prototype.mouseLeave = function () {
     this.image = this.normalImage;
     this.changed();
 };
-
