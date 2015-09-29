@@ -581,16 +581,6 @@ SpriteMorph.prototype.initBlocks = function () {
             category: 'control',
             spec: 'when %keyHat key pressed'
         },
-
-    /* migrated to a newer block version:
-  
-        receiveClick: {
-            type: 'hat',
-            category: 'control',
-            spec: 'when I am clicked'
-        },
-    */
-
         receiveInteraction: {
             type: 'hat',
             category: 'control',
@@ -654,21 +644,6 @@ SpriteMorph.prototype.initBlocks = function () {
             category: 'control',
             spec: 'if %b %c else %c'
         },
-
-    /* migrated to a newer block version:
-
-        doStop: {
-            type: 'command',
-            category: 'control',
-            spec: 'stop script'
-        },
-        doStopAll: {
-            type: 'command',
-            category: 'control',
-            spec: 'stop all %stop'
-        },
-    */
-
         doStopThis: {
             type: 'command',
             category: 'control',
@@ -694,37 +669,11 @@ SpriteMorph.prototype.initBlocks = function () {
             category: 'control',
             spec: 'call %repRing %inputs'
         },
-    /*
-        doRunWithInputList: {
-            type: 'command',
-            category: 'control',
-            spec: 'run %cmd with input list %l'
-        },
-
-        forkWithInputList: {
-            type: 'command',
-            category: 'control',
-            spec: 'launch %cmd with input list %l'
-        },
-
-        evaluateWithInputList: {
-            type: 'reporter',
-            category: 'control',
-            spec: 'call %r with input list %l'
-        },
-    */
         doReport: {
             type: 'command',
             category: 'control',
             spec: 'report %s'
         },
-    /*
-        doStopBlock: { // migrated to a newer block version
-            type: 'command',
-            category: 'control',
-            spec: 'stop block'
-        },
-    */
         doCallCC: {
             type: 'command',
             category: 'control',
@@ -1065,19 +1014,6 @@ SpriteMorph.prototype.initBlocks = function () {
             spec: '%txtfun of %s',
             defaults: [null, "Abelson & Sussman"]
         },
-
-    /*
-        reportScript: {
-            type: 'reporter',
-            category: 'operators',
-            spec: 'the script %parms %c'
-        },
-        reify: {
-            type: 'reporter',
-            category: 'operators',
-            spec: 'the %f block %parms'
-        },
-    */
 
         // Variables
         doSetVar: {
@@ -1888,12 +1824,6 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         blocks.push('-');
         blocks.push(block('doReport'));
         blocks.push('-');
-    /*
-    // old STOP variants, migrated to a newer version, now redundant
-        blocks.push(block('doStopBlock'));
-        blocks.push(block('doStop'));
-        blocks.push(block('doStopAll'));
-    */
         blocks.push(block('doStopThis'));
         blocks.push(block('doStopOthers'));
         blocks.push('-');
@@ -1901,13 +1831,6 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('fork'));
         blocks.push(block('evaluate'));
         blocks.push('-');
-    /*
-    // list variants commented out for now (redundant)
-        blocks.push(block('doRunWithInputList'));
-        blocks.push(block('forkWithInputList'));
-        blocks.push(block('evaluateWithInputList'));
-        blocks.push('-');
-    */
         blocks.push(block('doCallCC'));
         blocks.push(block('reportCallCC'));
         blocks.push('-');
@@ -2773,7 +2696,6 @@ SpriteMorph.prototype.userMenu = function () {
         menu = new MenuMorph(this);
 
     if (ide && ide.isAppMode) {
-        // menu.addItem('help', 'nop');
         return menu;
     }
     menu.addItem("duplicate", 'duplicate');
@@ -2862,7 +2784,6 @@ SpriteMorph.prototype.clonify = function (stage) {
 
 SpriteMorph.prototype.removeClone = function () {
     if (this.isClone) {
-        // this.stopTalking();
         this.parent.threads.stopAllForReceiver(this);
         this.destroy();
         this.parent.cloneCount -= 1;
@@ -5426,12 +5347,6 @@ StageMorph.prototype.blockTemplates = function (category) {
         blocks.push('-');
         blocks.push(block('doReport'));
         blocks.push('-');
-    /*
-    // old STOP variants, migrated to a newer version, now redundant
-        blocks.push(block('doStopBlock'));
-        blocks.push(block('doStop'));
-        blocks.push(block('doStopAll'));
-    */
         blocks.push(block('doStopThis'));
         blocks.push(block('doStopOthers'));
         blocks.push('-');
@@ -5439,13 +5354,6 @@ StageMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('fork'));
         blocks.push(block('evaluate'));
         blocks.push('-');
-    /*
-    // list variants commented out for now (redundant)
-        blocks.push(block('doRunWithInputList'));
-        blocks.push(block('forkWithInputList'));
-        blocks.push(block('evaluateWithInputList'));
-        blocks.push('-');
-    */
         blocks.push(block('doCallCC'));
         blocks.push(block('reportCallCC'));
         blocks.push('-');
@@ -5704,7 +5612,6 @@ StageMorph.prototype.userMenu = function () {
         myself = this;
 
     if (ide && ide.isAppMode) {
-        // menu.addItem('help', 'nop');
         return menu;
     }
     menu.addItem("edit", 'edit');
@@ -6621,12 +6528,6 @@ CostumeEditorMorph.prototype.drawNew = function () {
     }
     this.drawCachedTexture();
 
-/*
-    pattern = ctx.createPattern(this.background, 'repeat');
-    ctx.fillStyle = pattern;
-    ctx.fillRect(0, 0, this.size.x, this.size.y);
-*/
-
     ctx = this.image.getContext('2d');
 
     // draw the costume
@@ -7430,27 +7331,6 @@ WatcherMorph.prototype.fixLayout = function () {
     this.drawNew();
     this.changed();
 };
-
-// WatcherMorph events:
-
-/*
-// Scratch-like watcher-toggling, commented out b/c we have a drop-down menu
-
-WatcherMorph.prototype.mouseClickLeft = function () {
-    if (this.style === 'normal') {
-        if (this.target instanceof VariableFrame) {
-            this.style = 'slider';
-        } else {
-            this.style = 'large';
-        }
-    } else if (this.style === 'slider') {
-        this.style = 'large';
-    } else {
-        this.style = 'normal';
-    }
-    this.fixLayout();
-};
-*/
 
 // WatcherMorph user menu:
 
