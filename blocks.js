@@ -189,49 +189,6 @@ WorldMorph.prototype.customMorphs = function () {
     // add examples to the world's demo menu
 
     return [];
-
-/*
-    return [
-        new SymbolMorph(
-            'pipette',
-            50,
-            new Color(250, 250, 250),
-            new Point(-1, -1),
-            new Color(20, 20, 20)
-        )
-    ];
-*/
-/*
-    var sm = new ScriptsMorph();
-    sm.setExtent(new Point(800, 600));
-
-    return [
-        new SymbolMorph(),
-        new HatBlockMorph(),
-        new CommandBlockMorph(),
-        sm,
-        new CommandSlotMorph(),
-        new CSlotMorph(),
-        new InputSlotMorph(),
-        new InputSlotMorph(null, true),
-        new BooleanSlotMorph(),
-        new ColorSlotMorph(),
-        new TemplateSlotMorph('foo'),
-        new ReporterBlockMorph(),
-        new ReporterBlockMorph(true),
-        new ArrowMorph(),
-        new MultiArgMorph(),
-        new FunctionSlotMorph(),
-        new ReporterSlotMorph(),
-        new ReporterSlotMorph(true),
-//        new DialogBoxMorph('Dialog Box'),
-//        new InputFieldMorph('Input Field')
-        new RingMorph(),
-        new RingCommandSlotMorph(),
-        new RingReporterSlotMorph(),
-        new RingReporterSlotMorph(true)
-    ];
-*/
 };
 
 
@@ -1547,8 +1504,6 @@ SyntaxElementMorph.prototype.fixLayout = function () {
             }
         } else if (part instanceof BlockHighlightMorph) {
             nop(); // should be redundant now
-            // myself.fullChanged();
-            // myself.removeChild(part);
         } else {
             if (part.isVisible) {
                 x += part.fullBounds().width() + space;
@@ -3708,11 +3663,6 @@ CommandBlockMorph.prototype.drawNew = function () {
         this.drawBottomRightEdge(context);
     } else {
         nop();
-        /*
-        this.drawFlatBottomDentEdge(
-            context, 0, this.height() - this.corner
-        );
-        */
     }
 
     // erase CommandSlots
@@ -4781,10 +4731,6 @@ RingMorph.uber = ReporterBlockMorph.prototype;
 // RingMorph preferences settings:
 
 RingMorph.prototype.isCachingInputs = false;
-// RingMorph.prototype.edge = 2;
-// RingMorph.prototype.rounding = 9;
-// RingMorph.prototype.alpha = 0.8;
-// RingMorph.prototype.contrast = 85;
 
 // RingMorph instance creation:
 
@@ -6757,8 +6703,6 @@ InputSlotMorph.prototype.dropDownMenu = function (enableKeyboard) {
         if (Object.prototype.hasOwnProperty.call(choices, key)) {
             if (key[0] === '~') {
                 menu.addLine();
-            // } else if (key.indexOf('§_def') === 0) {
-            //     menu.addItem(choices[key].blockInstance(), choices[key]);
             } else {
                 menu.addItem(key, choices[key]);
             }
@@ -9172,7 +9116,6 @@ SymbolMorph.prototype.drawSymbolRobot = function (canvas, color) {
         l = Math.max(w / 20, 0.5);
 
     ctx.fillStyle = color.toString();
-    //ctx.lineWidth = l * 2;
 
     ctx.beginPath();
     ctx.moveTo(n + l, n);
@@ -11802,7 +11745,6 @@ ScriptFocusMorph.prototype.reactToKeyEvent = function (key) {
         types,
         vNames;
 
-    // console.log(evt);
     switch (evt) {
     case 'esc':
         return this.stopEditing();
