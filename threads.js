@@ -670,29 +670,6 @@ Process.prototype.evaluateSequence = function (arr) {
     }
 };
 
-/*
-// version w/o tail call optimization:
---------------------------------------
-Caution: we cannot just revert to this version of the method, because to make
-tail call elimination work many tweaks had to be done to various primitives.
-For the most part these tweaks are about schlepping the outer context (for
-the variable bindings) and the isCustomBlock flag along, and are indicated
-by a short comment in the code. But to really revert would take a good measure
-of trial and error as well as debugging. In the developers file archive there
-is a version of threads.js dated 120119(2) which basically resembles the
-last version before introducing tail call optimization on 120123.
-
-Process.prototype.evaluateSequence = function (arr) {
-    var pc = this.context.pc;
-    if (pc >= arr.length) {
-        this.popContext();
-    } else {
-        this.context.pc += 1;
-        this.pushContext(arr[pc]);
-    }
-};
-*/
-
 Process.prototype.evaluateNextInput = function (element) {
     var nxt = this.context.inputs.length,
         args = element.inputs(),

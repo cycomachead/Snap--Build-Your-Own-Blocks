@@ -1379,11 +1379,6 @@ SnapSerializer.prototype.openProject = function (project, ide) {
     ide.selectSprite(sprite);
     ide.fixLayout();
 
-    // force watchers to update
-    //project.stage.watchers().forEach(function (watcher) {
-    //  watcher.onNextStep = function () {this.currentValue = null;};
-    //})
-
     ide.world().keyboardReceiver = project.stage;
 };
 
