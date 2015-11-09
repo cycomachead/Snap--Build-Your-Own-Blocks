@@ -83,7 +83,7 @@ ArgLabelMorph, localize, XML_Element, hex_sha512*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.threads = '2015-October-02';
+modules.threads = '2015-November-07';
 
 var ThreadManager;
 var Process;
@@ -126,6 +126,20 @@ function snapEquals(a, b) {
     }
 
     return x === y;
+}
+
+function invoke(block) {
+    // exectue the given block synchronously, i.e. without yielding.
+    // For debugging purposes only.
+    // Caution: Kids, do not try this at home!
+    // use ThreadManager::startProcess instead
+    var proc = new Process(block);
+    while (proc.isRunning()) {
+        proc.runStep();
+    }
+    if (block instanceof ReporterBlockMorph) {
+        return proc.homeContext.inputs[0];
+    }
 }
 
 // ThreadManager ///////////////////////////////////////////////////////

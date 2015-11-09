@@ -2326,7 +2326,7 @@ SpriteMorph.prototype.freshPalette = function (category) {
                 x = block.right() + unit / 2;
                 ry = block.bottom();
             } else {
-                if (block.fixLayout) {block.fixLayout(); }
+                // if (block.fixLayout) {block.fixLayout(); }
                 x = 0;
                 y += block.height();
             }
@@ -3249,7 +3249,7 @@ SpriteMorph.prototype.bubble = function (data, isThought, isQuestion) {
     if (data === '' || isNil(data)) {return; }
     bubble = new SpriteBubbleMorph(
         data,
-        stage ? stage.scale : 1,
+        stage,
         isThought,
         isQuestion
     );
@@ -6054,18 +6054,19 @@ SpriteBubbleMorph.uber = SpeechBubbleMorph.prototype;
 
 // SpriteBubbleMorph instance creation:
 
-function SpriteBubbleMorph(data, scale, isThought, isQuestion) {
-    this.init(data, scale, isThought, isQuestion);
+function SpriteBubbleMorph(data, stage, isThought, isQuestion) {
+    this.init(data, stage, isThought, isQuestion);
 }
 
 SpriteBubbleMorph.prototype.init = function (
     data,
-    scale,
+    stage,
     isThought,
     isQuestion
 ) {
     var sprite = SpriteMorph.prototype;
-    this.scale = scale || 1;
+    this.stage = stage;
+    this.scale = stage ? stage.scale : 1;
     this.data = data;
     this.isQuestion = isQuestion;
 
@@ -6125,6 +6126,11 @@ SpriteBubbleMorph.prototype.dataAsMorph = function (data) {
         contents.isDraggable = false;
         contents.update(true);
         contents.step = contents.update;
+        if (this.stage) {
+            contents.expand(this.stage.extent().translateBy(
+                -2 * (this.edge + this.border + this.padding)
+            ));
+        }
     } else if (data instanceof Context) {
         img = data.image();
         contents = new Morph();
