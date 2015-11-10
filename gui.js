@@ -71,7 +71,7 @@ BlockRemovalDialogMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2015-October-07';
+modules.gui = '2015-November-09';
 
 // Declarations
 
@@ -2227,6 +2227,15 @@ IDE_Morph.prototype.settingsMenu = function () {
         'Stage size...',
         'userSetStageSize'
     );
+    if (shiftClicked) {
+        menu.addItem(
+            'Dragging threshold...',
+            'userSetDragThreshold',
+            'specify the distance the hand has to move\n' +
+                'before it picks up an object',
+            new Color(100, 0, 0)
+        );
+    }
     menu.addLine();
     addPreference(
         'Blurred shadows',
@@ -4201,6 +4210,29 @@ IDE_Morph.prototype.setStageExtent = function (aPoint) {
     }
 };
 
+// IDE_Morph dragging threshold (internal feature)
+
+IDE_Morph.prototype.userSetDragThreshold = function () {
+    new DialogBoxMorph(
+        this,
+        function (num) {
+            MorphicPreferences.grabThreshold = Math.min(
+                Math.max(+num, 0),
+                200
+            );
+        },
+        this
+    ).prompt(
+        "Dragging threshold",
+        MorphicPreferences.grabThreshold.toString(),
+        this.world(),
+        null, // pic
+        null, // choices
+        null, // read only
+        true // numeric
+    );
+};
+
 // IDE_Morph cloud interface
 
 IDE_Morph.prototype.initializeCloud = function () {
@@ -5945,12 +5977,17 @@ SpriteIconMorph.prototype.prepareToBeGrabbed = function () {
     var ide = this.parentThatIsA(IDE_Morph),
         idx;
     this.mouseClickLeft(); // select me
+    this.alpha = 0.8;
     if (ide) {
         idx = ide.sprites.asArray().indexOf(this.object);
         ide.sprites.remove(idx + 1);
         ide.createCorral();
         ide.fixLayout();
     }
+};
+
+SpriteIconMorph.prototype.justDropped = function () {
+    this.alpha = 1;
 };
 
 SpriteIconMorph.prototype.wantsDropOf = function (morph) {
