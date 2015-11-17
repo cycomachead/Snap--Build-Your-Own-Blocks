@@ -1553,8 +1553,8 @@ VariableFrame.prototype.toJSON = function (serializer) {
                 // TODO: figure this one out... (name for contents?)
                 value: typeof val === 'object' ? serializer.store(val)
                         : typeof val === 'boolean' ?
-                                serializer.format('<bool>$</bool>', val)
-                                : serializer.format('<l>$</l>', val)
+                                serializer.format({bool: '$'}, val)
+                                : serializer.format({l: '$'}, val)
             });
         }
     });
