@@ -125,7 +125,7 @@ PrototypeHatBlockMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.objects = '2015-November-16';
+modules.objects = '2015-November-25';
 
 var SpriteMorph;
 var StageMorph;
@@ -601,6 +601,11 @@ SpriteMorph.prototype.initBlocks = function () {
             type: 'hat',
             category: 'control',
             spec: 'when I receive %msgHat'
+        },
+        receiveCondition: {
+            type: 'hat',
+            category: 'control',
+            spec: 'when %b'
         },
         doBroadcast: {
             type: 'command',
@@ -1867,6 +1872,11 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('receiveGo'));
         blocks.push(block('receiveKey'));
         blocks.push(block('receiveInteraction'));
+
+        if (StageMorph.prototype.enableCustomHatBlocks) {
+            blocks.push(block('receiveCondition'));
+        }
+
         blocks.push(block('receiveMessage'));
         blocks.push('-');
         blocks.push(block('doBroadcast'));
@@ -3693,6 +3703,16 @@ SpriteMorph.prototype.allHatBlocksForInteraction = function (interaction) {
     });
 };
 
+SpriteMorph.prototype.allGenericHatBlocks = function () {
+    return this.scripts.children.filter(function (morph) {
+        if (morph.selector) {
+            return morph.selector === 'receiveCondition';
+        }
+        return false;
+    });
+};
+
+
 // SpriteMorph events
 
 SpriteMorph.prototype.mouseClickLeft = function () {
@@ -4674,6 +4694,7 @@ StageMorph.prototype.hiddenPrimitives = {};
 StageMorph.prototype.codeMappings = {};
 StageMorph.prototype.codeHeaders = {};
 StageMorph.prototype.enableCodeMapping = false;
+StageMorph.prototype.enableCustomHatBlocks = false;
 
 StageMorph.prototype.enableInheritance = false;
 
@@ -5036,6 +5057,9 @@ StageMorph.prototype.step = function () {
     }
 
     // manage threads
+    if (this.enableCustomHatBlocks) {
+        this.stepGenericConditions();
+    }
     if (this.isFastTracked && this.threads.processes.length) {
         this.children.forEach(function (morph) {
             if (morph instanceof SpriteMorph) {
@@ -5070,6 +5094,19 @@ StageMorph.prototype.step = function () {
         });
         this.lastWatcherUpdate = Date.now();
     }
+};
+
+StageMorph.prototype.stepGenericConditions = function (stopAll) {
+    var hats = [],
+        myself = this;
+    this.children.concat(this).forEach(function (morph) {
+        if (morph instanceof SpriteMorph || morph instanceof StageMorph) {
+            hats = hats.concat(morph.allGenericHatBlocks());
+        }
+    });
+    hats.forEach(function (block) {
+        myself.threads.doWhen(block, stopAll);
+    });
 };
 
 StageMorph.prototype.developersMenu = function () {
@@ -5430,6 +5467,11 @@ StageMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('receiveGo'));
         blocks.push(block('receiveKey'));
         blocks.push(block('receiveInteraction'));
+
+        if (StageMorph.prototype.enableCustomHatBlocks) {
+            blocks.push(block('receiveCondition'));
+        }
+
         blocks.push(block('receiveMessage'));
         blocks.push('-');
         blocks.push(block('doBroadcast'));
@@ -5983,6 +6025,9 @@ StageMorph.prototype.allHatBlocksForKey
 
 StageMorph.prototype.allHatBlocksForInteraction
     = SpriteMorph.prototype.allHatBlocksForInteraction;
+
+StageMorph.prototype.allGenericHatBlocks
+    = SpriteMorph.prototype.allGenericHatBlocks;
 
 // StageMorph events
 

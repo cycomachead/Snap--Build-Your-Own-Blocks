@@ -71,7 +71,7 @@ BlockRemovalDialogMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2015-November-16';
+modules.gui = '2015-November-25';
 
 // Declarations
 
@@ -2431,6 +2431,23 @@ IDE_Morph.prototype.settingsMenu = function () {
         'check for flat ends of lines'
     );
     addPreference(
+        'Custom hat blocks',
+        function () {
+            StageMorph.prototype.enableCustomHatBlocks =
+                !StageMorph.prototype.enableCustomHatBlocks;
+            myself.currentSprite.blocksCache.control = null;
+            myself.currentSprite.paletteCache.control = null;
+            myself.refreshPalette();
+            if (!StageMorph.prototype.enableCustomHatBlocks) {
+                myself.stage.stepGenericConditions(true); // stop all
+            }
+        },
+        StageMorph.prototype.enableCustomHatBlocks,
+        'uncheck to disable\ncustom hat blocks',
+        'check to enable\ncustom hat blocks',
+        false
+    );
+    addPreference(
         'Codification support',
         function () {
             StageMorph.prototype.enableCodeMapping =
@@ -2935,6 +2952,7 @@ IDE_Morph.prototype.newProject = function () {
     StageMorph.prototype.hiddenPrimitives = {};
     StageMorph.prototype.codeMappings = {};
     StageMorph.prototype.codeHeaders = {};
+    StageMorph.prototype.enableCustomHatBlocks = false;
     StageMorph.prototype.enableCodeMapping = false;
     StageMorph.prototype.enableInheritance = false;
     SpriteMorph.prototype.useFlatLineEnds = false;

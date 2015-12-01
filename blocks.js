@@ -156,7 +156,7 @@ DialogBoxMorph, BlockInputFragmentMorph, PrototypeHatBlockMorph, Costume*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.blocks = '2015-November-17';
+modules.blocks = '2015-December-01';
 
 var SyntaxElementMorph;
 var BlockMorph;
@@ -630,6 +630,10 @@ SyntaxElementMorph.prototype.getVarNamesDict = function () {
         if (morph instanceof PrototypeHatBlockMorph) {
             tempVars.push.apply(
                 tempVars,
+                morph.variableNames()
+            );
+            tempVars.push.apply(
+                tempVars,
                 morph.inputs()[0].inputFragmentNames()
             );
         } else if (morph instanceof BlockMorph) {
@@ -778,6 +782,10 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
             break;
         case '%scriptVars':
             part = new MultiArgMorph('%t', null, 1, spec);
+            part.canBeEmpty = false;
+            break;
+        case '%blockVars':
+            part = new MultiArgMorph('%t', 'block variables', 0, spec);
             part.canBeEmpty = false;
             break;
         case '%parms':
@@ -2125,11 +2133,9 @@ BlockMorph.prototype.setSpec = function (spec, silently) {
         if (part instanceof RingMorph) {
             part.fixBlockColor();
         }
-        if (part instanceof MultiArgMorph
-                || contains(
-                    [CommandSlotMorph, RingCommandSlotMorph],
-                    part.constructor
-                )) {
+        if (part instanceof MultiArgMorph ||
+                part.constructor === CommandSlotMorph ||
+                part.constructor === RingCommandSlotMorph) {
             part.fixLayout();
         }
         if (myself.isPrototype) {
@@ -2374,7 +2380,7 @@ BlockMorph.prototype.developersMenu = function () {
 
         new DialogBoxMorph(
             this,
-            this.setSpec,
+            this.userSetSpec,
             this
         ).prompt(
             menu.title + '\nspec',
@@ -3181,6 +3187,8 @@ BlockMorph.prototype.fullCopy = function () {
             block.cachedInputs = null;
             if (block instanceof InputSlotMorph) {
                 block.contents().clearSelection();
+            } else if (block.definition) {
+                block.initializeVariables();
             }
         } else if (block instanceof CursorMorph) {
             block.destroy();
@@ -4400,11 +4408,12 @@ ReporterBlockMorph.prototype.blockSequence = function () {
 // ReporterBlockMorph evaluating
 
 ReporterBlockMorph.prototype.isUnevaluated = function () {
-/*
-    answer whether my parent block's slot is designated to be of an
-    'unevaluated' kind, denoting a spedial form
-*/
-    return contains(['%anyUE', '%boolUE', '%f'], this.getSlotSpec());
+    // answer whether my parent block's slot is designated to be of an
+    // 'unevaluated' kind, denoting a spedial form
+    var spec = this.getSlotSpec();
+    return spec === '%anyUE' ||
+        spec === '%boolUE' ||
+        spec === '%f';
 };
 
 ReporterBlockMorph.prototype.isLocked = function () {
@@ -4439,7 +4448,7 @@ ReporterBlockMorph.prototype.getSlotSpec = function () {
 
 // ReporterBlockMorph events
 
-ReporterBlockMorph.prototype.mouseClickLeft = function (pos) {
+ReporterBlockMorph.prototype.xxx_mouseClickLeft = function (pos) {
     var isRing;
     if (this.parent instanceof BlockInputFragmentMorph) {
         return this.parent.mouseClickLeft();
@@ -4453,6 +4462,34 @@ ReporterBlockMorph.prototype.mouseClickLeft = function (pos) {
             this
         ).prompt(
             isRing ? "Input name" : "Script variable name",
+            this.blockSpec,
+            this.world()
+        );
+    } else {
+        ReporterBlockMorph.uber.mouseClickLeft.call(this, pos);
+    }
+};
+
+ReporterBlockMorph.prototype.mouseClickLeft = function (pos) {
+    var label;
+    if (this.parent instanceof BlockInputFragmentMorph) {
+        return this.parent.mouseClickLeft();
+    }
+    if (this.parent instanceof TemplateSlotMorph) {
+        if (this.parent.parent && this.parent.parent.parent &&
+                this.parent.parent.parent instanceof RingMorph) {
+            label = "Input name";
+        } else if (this.parent.parent.elementSpec === '%blockVars') {
+            label = "Block variable name";
+        } else {
+            label = "Script variable name";
+        }
+        new DialogBoxMorph(
+            this,
+            this.userSetSpec,
+            this
+        ).prompt(
+            label,
             this.blockSpec,
             this.world()
         );
@@ -9713,7 +9750,8 @@ MultiArgMorph.prototype.addInput = function (contents) {
     // newPart.alpha = this.alpha ? 1 : (1 - this.alpha) / 2;
     if (contents) {
         newPart.setContents(contents);
-    } else if (this.elementSpec === '%scriptVars') {
+    } else if (this.elementSpec === '%scriptVars' ||
+            this.elementSpec === '%blockVars') {
         name = '';
         i = idx;
         while (i > 0) {

@@ -2689,3 +2689,44 @@ end - bulk of 151116
 151120
 ------
 * Lists: fixed linked lists identity loss when showing watchers
+
+++++++++++++++++++++++++++
+new stuff - bulk of
+++++++++++++++++++++++++++
+
+151121
+------
+* Threads: Show result bubble when the user clicks on a command script that uses REPORT (You can now click on REPORT and it actually does something)
+
+151124
+------
+* Blocks: fix a re-rendering glitch when changing block specs in dev mode
+* Threads: add optional receiver (environment) to invoke() function
+
+151125
+------
+* Threads, Objects, GUI, Store: Generic “When” hat block
+* BYOB: fixed a rendering bug when using plain prototype labels
+
+151126
+------
+* Threads, Blocks: Performance optimizations (replace “contains” with chained tests)
+* German translation update (for custom hat blocks)
+
+151127
+------
+* Blocks, BYOB, Store: new experimental block variables feature
+* BYOB: more prototype label rendering fixes
+
+151128
+------
+* BYOB, Store: Fix some bugs related to block vars (zebra coloring etc.)
+
+151201
+------
+* BYOB, Blocks: Fix BlockMorph.fullCopy() for block vars
+
+++++++++++++++++++++++++++
+end - bulk of
+++++++++++++++++++++++++++
+
