@@ -83,7 +83,7 @@ ArgLabelMorph, localize, XML_Element, hex_sha512*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.threads = '2015-November-16';
+modules.threads = '2015-November-26';
 
 var ThreadManager;
 var Process;
@@ -128,20 +128,47 @@ function snapEquals(a, b) {
     return x === y;
 }
 
-function invoke(block, timeout) {
-    // exectue the given block synchronously, i.e. without yielding.
+function invoke(block, receiver, timeout, timeoutErrorMsg, suppressErrors) {
+    // execute the given block synchronously, i.e. without yielding.
+    // receiver (sprite, stage or environment), timeout etc. are optional.
     // if a timeout (in milliseconds) is specified, abort execution
     // after the timeout has been reached and throw an error.
-    // For debugging purposes only.
+    // suppressErrors (bool) if non-timeout errors occurring in the
+    // block are handled elsewhere.
+    // This is highly experimental.
     // Caution: Kids, do not try this at home!
-    // use ThreadManager::startProcess instead
-    var proc = new Process(block),
-        startTime = Date.now();
-    while (proc.isRunning()) {
-        if (timeout && ((Date.now() - startTime) > timeout)) {
-            throw (new Error("a synchronous Snap! script has timed out"));
+    // use ThreadManager::startProcess with a callback instead
+
+    var proc = new Process(),
+        rcvr = receiver || block.receiver(),
+        deadline = (timeout ? Date.now() + timeout : null);
+
+    proc.topBlock = block;
+    if (rcvr) {
+        proc.homeContext = new Context();
+        proc.homeContext.receiver = rcvr;
+        if (rcvr.variables) {
+            proc.homeContext.variables.parentFrame = rcvr.variables;
         }
-        proc.runStep();
+    }
+    proc.context = new Context(
+        null,
+        block.blockSequence(),
+        proc.homeContext
+    );
+    if (suppressErrors) {
+        proc.isCatchingErrors = false;
+    }
+    while (proc.isRunning()) {
+        if (deadline && (Date.now() > deadline)) {
+            throw (new Error(
+                localize(
+                    timeoutErrorMsg ||
+                        "a synchronous Snap! script has timed out")
+                )
+            );
+        }
+        proc.runStep(deadline);
     }
     if (block instanceof ReporterBlockMorph) {
         return proc.homeContext.inputs[0];
@@ -159,7 +186,7 @@ ThreadManager.prototype.toggleProcess = function (block) {
     if (active) {
         active.stop();
     } else {
-        return this.startProcess(block);
+        return this.startProcess(block, null, null, null, true);
     }
 };
 
@@ -167,7 +194,8 @@ ThreadManager.prototype.startProcess = function (
     block,
     isThreadSafe,
     exportResult,
-    callback
+    callback,
+    isClicked
 ) {
     var active = this.findProcess(block),
         top = block.topBlock(),
@@ -181,6 +209,7 @@ ThreadManager.prototype.startProcess = function (
     }
     newProc = new Process(block.topBlock(), callback);
     newProc.exportResult = exportResult;
+    newProc.isClicked = isClicked || false;
     if (!newProc.homeContext.receiver.isClone) {
         top.addHighlight();
     }
@@ -267,7 +296,7 @@ ThreadManager.prototype.removeTerminatedProcesses = function () {
                 }
             }
 
-            if (proc.topBlock instanceof ReporterBlockMorph) {
+            if (proc.topBlock instanceof ReporterBlockMorph || proc.isShowingResult) {
                 if (proc.onComplete instanceof Function) {
                     proc.onComplete(proc.homeContext.inputs[0]);
                 } else {
@@ -301,6 +330,36 @@ ThreadManager.prototype.findProcess = function (block) {
             return each.topBlock === top;
         }
     );
+};
+
+ThreadManager.prototype.doWhen = function (block, stopIt) {
+    var pred = block.inputs()[0];
+    if (block.removeHighlight()) {
+        block.world().hand.destroyTemporaries();
+    }
+    if (stopIt) {return; }
+    if ((!block) ||
+        !(pred instanceof ReporterBlockMorph) ||
+        this.findProcess(block)
+    ) {return; }
+    try {
+        if (invoke(
+            pred,
+            null,
+            20,
+            'the predicate takes\ntoo long for a\ncustom hat block',
+            true // suppress errors => handle them right here instead
+        ) === true) {
+            this.startProcess(block);
+        }
+    } catch (error) {
+        block.addErrorHighlight();
+        block.showBubble(
+            error.name
+            + '\n'
+            + error.message
+        );
+    }
 };
 
 // Process /////////////////////////////////////////////////////////////
@@ -349,6 +408,10 @@ ThreadManager.prototype.findProcess = function (block) {
     httpRequest         active instance of an HttpRequest or null
     pauseOffset         msecs between the start of an interpolated operation
                         and when the process was paused
+    isClicked           boolean flag indicating whether the process was
+                        initiated by a user-click on a block
+    isShowingResult     boolean flag indicating whether a "report" command
+                        has been executed in a user-clicked process
     exportResult        boolean flag indicating whether a picture of the top
                         block along with the result bubble shoud be exported
     onComplete          an optional callback function to be executed when
@@ -369,6 +432,8 @@ function Process(topBlock, onComplete) {
     this.readyToYield = false;
     this.readyToTerminate = false;
     this.isDead = false;
+    this.isClicked = false;
+    this.isShowingResult = false;
     this.errorFlag = false;
     this.context = null;
     this.homeContext = new Context();
@@ -404,7 +469,7 @@ Process.prototype.isRunning = function () {
 
 // Process entry points
 
-Process.prototype.runStep = function () {
+Process.prototype.runStep = function (deadline) {
     // a step is an an uninterruptable 'atom', it can consist
     // of several contexts, even of several blocks
 
@@ -421,6 +486,14 @@ Process.prototype.runStep = function () {
         // also allow pausing inside atomic steps - for PAUSE block primitive:
         if (this.isPaused) {
             return this.pauseStep();
+        }
+        if (deadline && (Date.now() > deadline)) {
+            if (this.isAtomic &&
+                    this.homeContext.receiver &&
+                    this.homeContext.receiver.endWarp) {
+                this.homeContext.receiver.endWarp();
+            }
+            return;
         }
         this.evaluateContext();
     }
@@ -505,9 +578,12 @@ Process.prototype.evaluateContext = function () {
 };
 
 Process.prototype.evaluateBlock = function (block, argCount) {
+    var selector = block.selector;
     // check for special forms
-    if (contains(['reportOr', 'reportAnd', 'doReport'], block.selector)) {
-        return this[block.selector](block);
+    if (selector === 'reportOr' ||
+            selector ===  'reportAnd' ||
+            selector === 'doReport') {
+        return this[selector](block);
     }
 
     // first evaluate all inputs, then apply the primitive
@@ -517,13 +593,13 @@ Process.prototype.evaluateBlock = function (block, argCount) {
     if (argCount > inputs.length) {
         this.evaluateNextInput(block);
     } else {
-        if (this[block.selector]) {
+        if (this[selector]) {
             rcvr = this;
         }
         if (this.isCatchingErrors) {
             try {
                 this.returnValueToParentContext(
-                    rcvr[block.selector].apply(rcvr, inputs)
+                    rcvr[selector].apply(rcvr, inputs)
                 );
                 this.popContext();
             } catch (error) {
@@ -531,7 +607,7 @@ Process.prototype.evaluateBlock = function (block, argCount) {
             }
         } else {
             this.returnValueToParentContext(
-                rcvr[block.selector].apply(rcvr, inputs)
+                rcvr[selector].apply(rcvr, inputs)
             );
             this.popContext();
         }
@@ -574,6 +650,7 @@ Process.prototype.reportAnd = function (block) {
 
 Process.prototype.doReport = function (block) {
     var outer = this.context.outerContext;
+    if (this.isClicked) {this.isShowingResult = true; }
     if (this.context.expression.partOfCustomCommand) {
         this.doStopCustomBlock();
         this.popContext();
@@ -655,10 +732,9 @@ Process.prototype.evaluateInput = function (input) {
     } else {
         ans = input.evaluate();
         if (ans) {
-            if (contains(
-                    [CommandSlotMorph, ReporterSlotMorph],
-                    input.constructor
-                ) || (input instanceof CSlotMorph &&
+            if (input.constructor === CommandSlotMorph ||
+                    input.constructor === ReporterSlotMorph ||
+                    (input instanceof CSlotMorph &&
                         (!input.isStatic || input.isLambda))) {
                 // I know, this still needs yet to be done right....
                 ans = this.reify(ans, new List());
@@ -718,6 +794,7 @@ Process.prototype.evaluateNextInput = function (element) {
     var nxt = this.context.inputs.length,
         args = element.inputs(),
         exp = args[nxt],
+        sel = this.context.expression.selector,
         outer = this.context.outerContext; // for tail call elimination
 
     if (exp.isUnevaluated) {
@@ -729,8 +806,7 @@ Process.prototype.evaluateNextInput = function (element) {
                 THE SCRIPT), because those allow for additional
                 explicit parameter bindings.
             */
-            if (contains(['reify', 'reportScript'],
-                    this.context.expression.selector)) {
+            if (sel === 'reify' || sel === 'reportScript') {
                 this.context.addInput(exp);
             } else {
                 this.context.addInput(this.reify(exp, new List()));
@@ -1091,8 +1167,17 @@ Process.prototype.evaluateCustomBlock = function () {
     this.procedureCount += 1;
     outer = new Context();
     outer.receiver = this.context.receiver;
+
+    outer.variables.parentFrame = this.context.expression.variables;
+
+    // block (instance) var support, experimental:
+    this.context.expression.variables.parentFrame = outer.receiver ?
+            outer.receiver.variables : null;
+
+    /* // original code without block variables:
     outer.variables.parentFrame = outer.receiver ?
             outer.receiver.variables : null;
+    */
 
     runnable = new Context(
         this.context.parentContext,
@@ -2110,10 +2195,12 @@ Process.prototype.reportIsIdentical = function (a, b) {
 
 Process.prototype.isImmutable = function (obj) {
     // private
-    return contains(
-        ['nothing', 'Boolean', 'text', 'number', 'undefined'],
-        this.reportTypeOf(obj)
-    );
+    var type = this.reportTypeOf(obj);
+    return type === 'nothing' ||
+        type === 'Boolean' ||
+        type === 'text' ||
+        type === 'number' ||
+        type === 'undefined';
 };
 
 Process.prototype.reportTrue = function () {

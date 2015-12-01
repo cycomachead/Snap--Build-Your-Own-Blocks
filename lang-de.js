@@ -185,7 +185,7 @@ SnapTranslator.dict.de = {
     'translator_e-mail':
         'jens@moenig.org', // optional
     'last_changed':
-        '2015-10-07', // this, too, will appear in the Translators tab
+        '2015-11-26', // this, too, will appear in the Translators tab
 
     // GUI
     // control bar:
@@ -429,6 +429,8 @@ SnapTranslator.dict.de = {
         'vom Mauszeiger betreten',
     'mouse-departed':
         'vom Mauszeiger verlassen',
+    'when %b':
+        'Wenn %b',
     'when I receive %msgHat':
         'Wenn ich %msgHat empfange',
     'broadcast %msg':
@@ -829,6 +831,8 @@ SnapTranslator.dict.de = {
         'einschalten f\u00fcr flache\nPinselstrichenden',
     'uncheck for round ends of lines':
         'auschalten f\u00fcr runde\nPinselstrichenden',
+    'Custom hat blocks':
+        'Generische Kopfbl\u00f6cke',
     'Inheritance support':
         'Prototypische Vererbung',
 
