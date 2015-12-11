@@ -2609,6 +2609,25 @@ IDE_Morph.prototype.projectMenu = function () {
         'load the official library of\npowerful blocks'
     );
     menu.addItem(
+        'Import extension...',
+        function() {
+            myself.prompt(
+                    'Enter an extension URL',
+                    function (url) {
+                        ExtensionLoader.loadFromURL(url);
+                        document.removeEventListener('extensionLoaded'); 
+                        document.addEventListener('extensionLoaded', function() {
+                            myself.categories.destroy();
+                            myself.createCategories();
+                            myself.refreshIDE();
+                        })
+                    }, 
+                    null, 
+                    'wat');
+        },
+        'Import a Snap! or Scratch extension.'
+    );
+    menu.addItem(
         'Libraries...',
         createMediaMenu(
             'libraries',
