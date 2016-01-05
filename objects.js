@@ -1297,6 +1297,8 @@ SpriteMorph.prototype.blockAlternatives = {
     doIfElse: ['doIf', 'doUntil'],
     doRepeat: ['doUntil'],
     doUntil: ['doRepeat', 'doIf'],
+    doRun: ['fork'],
+    fork: ['doRun'],
 
     // sensing:
     doAsk: ['bubble', 'doThink', 'doSayFor', 'doThinkFor'],
