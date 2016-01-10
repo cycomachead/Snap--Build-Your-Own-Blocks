@@ -1074,7 +1074,6 @@ var standardSettings = {
     scrollBarSize: 12,
     mouseScrollAmount: 40,
     useSliderForInput: false,
-    useVirtualKeyboard: true,
     isTouchDevice: false, // turned on by touch events, don't set
     rasterizeSVGs: false,
     isFlat: false,
@@ -1094,7 +1093,6 @@ var touchScreenSettings = {
     scrollBarSize: 24,
     mouseScrollAmount: 40,
     useSliderForInput: true,
-    useVirtualKeyboard: true,
     isTouchDevice: false,
     rasterizeSVGs: false,
     isFlat: false,
@@ -10261,9 +10259,7 @@ WorldMorph.prototype.initVirtualKeyboard = function () {
         document.body.removeChild(this.virtualKeyboard);
         this.virtualKeyboard = null;
     }
-    if (!MorphicPreferences.useVirtualKeyboard) {
-        return;
-    }
+
     this.virtualKeyboard = document.createElement("input");
     this.virtualKeyboard.type = "text";
     this.virtualKeyboard.style.color = "transparent";
@@ -10329,20 +10325,29 @@ WorldMorph.prototype.initVirtualKeyboard = function () {
         false
     );
 
+    // Handle "combination" or dead-key characters with diacritics on OS X.
     this.virtualKeyboard.addEventListener(
         "compositionend",
-        function (event){
-		var newEvent = {ctrlKey : false, altKey : false, shiftKey : false, metaKey : false,
-				keyCode : 0, charCode : 0, preventDefault : function(){}};
-            	if (myself.keyboardReceiver) {
-				for (var i = 0; i < event.data.length; ++i){
-					newEvent.keyCode=0;  
-					newEvent.charCode=event.data.charCodeAt( i);
-					myself.keyboardReceiver.processKeyPress( newEvent);
-				}
+        function (event) {
+            var i,
+                newEvent = {
+                    ctrlKey: false,
+                    altKey: false,
+                    shiftKey: false,
+                    metaKey: false,
+                    keyCode: 0,
+                    charCode: 0,
+                    preventDefault: nop
+                };
+            if (myself.keyboardReceiver) {
+                for (var i = 0; i < event.data.length; ++i) {
+                    newEvent.keyCode = 0;  
+                    newEvent.charCode = event.data.charCodeAt(i);
+                    myself.keyboardReceiver.processKeyPress(newEvent);
+                }
             }
        },
-        false
+       false
     );
 
 };
@@ -10904,11 +10909,9 @@ WorldMorph.prototype.edit = function (aStringOrTextMorph) {
     this.keyboardReceiver = this.cursor;
 
     this.initVirtualKeyboard();
-    if (MorphicPreferences.useVirtualKeyboard) {
-        this.virtualKeyboard.style.top = this.cursor.top() + pos.y + "px";
-        this.virtualKeyboard.style.left = this.cursor.left() + pos.x + "px";
-        this.virtualKeyboard.focus();
-    }
+    this.virtualKeyboard.style.top = this.cursor.top() + pos.y + "px";
+    this.virtualKeyboard.style.left = this.cursor.left() + pos.x + "px";
+    this.virtualKeyboard.focus();
 
     if (MorphicPreferences.useSliderForInput) {
         if (!aStringOrTextMorph.parentThatIsA(MenuMorph)) {
