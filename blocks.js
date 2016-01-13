@@ -757,6 +757,17 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
             return part;
         }
 
+        if (spec.substring(0,3) === '%m.') { 
+            // This is a dropdown menu being loaded by an extension
+            part = new InputSlotMorph(
+                    null, // text
+                    false, // numeric?
+                    ScratchExtensions.menuOptions[spec.substring(3)],
+                    true // read-only
+                    );
+            return part;
+        }
+    
         // single-arg and specialized multi-arg slots:
         switch (spec) {
         case '%imgsource':
@@ -1470,14 +1481,6 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
         part.shadowOffset = MorphicPreferences.isFlat ?
                 new Point() : this.embossing;
         part.drawNew();
-    } else if (spec.substring(0,3) === '%m.') { 
-        // This is a dropdown menu being loaded by an extension
-        part = new InputSlotMorph(
-                null, // text
-                false, // numeric?
-                ScratchExtensions.menuOptions[spec],
-                true // read-only
-            );
     } else {
         part = new StringMorph(
             spec, // text

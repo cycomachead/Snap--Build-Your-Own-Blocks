@@ -2174,6 +2174,10 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         button.selector = 'addCustomBlock';
         button.showHelp = BlockMorph.prototype.showHelp;
         blocks.push(button);
+    } else if (ScratchExtensions.blocks[cat]) {
+        ScratchExtensions.blocks[cat].forEach(function(eachBlock) {
+            blocks.push(eachBlock);
+        })
     }
     return blocks;
 };

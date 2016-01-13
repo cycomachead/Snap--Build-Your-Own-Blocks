@@ -28,6 +28,7 @@
     defined. Use this list to locate code in this document:
 
 
+    ScriptLoader, ScratchExtensions
 
     credits
     -------
@@ -47,34 +48,46 @@ modules.extensions = '2015-December-11';
 
 // Declarations
 
-var ExtensionLoader = {};
+var ScriptLoader = {};
 
-ExtensionLoader.loadFromURL = function(src, callback) {
+ScriptLoader.loadFromURL = function(src, callback) {
     var script = document.createElement('script');
     script.setAttribute('type', 'text/javascript');
     script.setAttribute('src', src);
     document.head.appendChild(script);
     script.onload = callback;
-    // ScratchExtensions takes over when the script is loaded
 }
 
 // Scratch compatibility
 
-// Some extensions make use of some jQuery functions
-
-$ = {};
-$.getScript = ExtensionLoader.loadFromURL;
-
 // We need a ScratchExtensions singleton that knows how to read extensions
-// and translates them into something that Snap! understands
+// and translates them into something that Snap! understands.
+// We can't change the singleton's name because that's what Scratch extensions
+// expect it to be called.
 
 var ScratchExtensions = {
-    menuOptions: []
+    menuOptions: {},
+    blocks: {}
 };
+
+ScratchExtensions.loadFromURL = function(url, callback, needsJQuery) {
+    if (needsJQuery) {
+        ScriptLoader.loadFromURL(
+                'https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js', 
+                function() {
+                    ScratchExtensions.loadFromURL(url, callback);
+                }
+                );
+    } else {
+        ScriptLoader.loadFromURL(url);
+        document.removeEventListener('extensionLoaded'); 
+        document.addEventListener('extensionLoaded', callback)
+    }
+}
 
 ScratchExtensions.register = function(name, descriptor, extension) {
     var namespace = name.toLowerCase().replace(/[^a-z]/, '') + '_',
-        category = name.length > 14 ? name.substring(0, 11) + '...' : name;
+        category = name.length > 13 ? name.substring(0, 11) + '...' : name;
 
     if (!SpriteMorph.prototype.categories[category]) {
         SpriteMorph.prototype.categories.push(category);
@@ -98,12 +111,14 @@ ScratchExtensions.loadMethods = function(methodHolder, namespace) {
 ScratchExtensions.loadMenus = function(menus) {
     var myself = this;
 
-    Object.keys(menus).forEach(function(eachKey) {
-        myself.menuOptions[eachKey] = {};
-        menus[eachKey].forEach(function(eachValue) {
-            myself.menuOptions[eachKey][eachValue] = eachValue;
+    if (menus) {
+        Object.keys(menus).forEach(function(eachKey) {
+            myself.menuOptions[eachKey] = {};
+            menus[eachKey].forEach(function(eachValue) {
+                myself.menuOptions[eachKey][eachValue] = eachValue;
+            })
         })
-    })
+    }
   
 }
 
@@ -120,14 +135,17 @@ ScratchExtensions.loadBlocks = function(blockSpecs, namespace, category) {
         
     */
 
+    var myself = this;
+
+    ScratchExtensions.blocks[category] = [];
+
     blockSpecs.forEach(function(spec) {
         var op = spec[0],
             specString = spec[1],
-            methodName = namespace + spec[2],
+            selector = namespace + spec[2],
             defaults = spec.splice(3),
             isAsync,
             type;
-
 
         switch(op) {
             case ' ':
@@ -156,17 +174,23 @@ ScratchExtensions.loadBlocks = function(blockSpecs, namespace, category) {
                 break;
         }
 
-        if (Process.prototype[methodName]) {
-            SpriteMorph.prototype.blocks[methodName] = {
+        if (Process.prototype[selector]) {
+            var blockInfo = {
                 type: type,
                 category: category,
                 spec: specString,
                 defaults: defaults
-            }
-            // push this one to the palette!
+            };
+
+            SpriteMorph.prototype.blocks[selector] = blockInfo;
+
+            var block = SpriteMorph.prototype.blockForSelector(selector);
+            block.isTemplate = true;
+
+            ScratchExtensions.blocks[category].push(block);
 
         } else { 
-            console.log('missing method: ' + methodName);
+            console.log('missing method: ' + selector);
         }
     })
 }

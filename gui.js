@@ -2614,16 +2614,18 @@ IDE_Morph.prototype.projectMenu = function () {
             myself.prompt(
                     'Enter an extension URL',
                     function (url) {
-                        ExtensionLoader.loadFromURL(url);
-                        document.removeEventListener('extensionLoaded'); 
-                        document.addEventListener('extensionLoaded', function() {
-                            myself.categories.destroy();
-                            myself.createCategories();
-                            myself.refreshIDE();
-                        })
+                        ScratchExtensions.loadFromURL(
+                                url, 
+                                function() {
+                                    myself.categories.destroy();
+                                    myself.createCategories();
+                                    myself.refreshIDE();
+                                },
+                                myself.getURL(url).indexOf('$') > -1 // do we need to load jQuery?
+                                )
                     }, 
                     null, 
-                    'wat');
+                    '');
         },
         'Import a Snap! or Scratch extension.'
     );
@@ -2950,6 +2952,10 @@ IDE_Morph.prototype.newProject = function () {
     this.globalVariables = new VariableFrame();
     this.currentSprite = new SpriteMorph(this.globalVariables);
     this.sprites = new List([this.currentSprite]);
+
+    ScratchExtensions.blocks = {};
+    ScratchExtensions.menuOptions = {};
+
     StageMorph.prototype.dimensions = new Point(480, 360);
     StageMorph.prototype.hiddenPrimitives = {};
     StageMorph.prototype.codeMappings = {};
