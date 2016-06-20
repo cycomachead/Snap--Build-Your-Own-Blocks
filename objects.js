@@ -883,6 +883,16 @@ SpriteMorph.prototype.initBlocks = function () {
             spec: '%rp %ringparms',
             alias: 'predicate ring lambda'
         },
+        reportNum: {
+            type: 'reporter',
+            category: 'operators',
+            spec: '# %nWrite'
+        },
+        reportStr: {
+            type: 'reporter',
+            category: 'operators',
+            spec: '" %sWrite "'
+        },
         reportSum: {
             type: 'reporter',
             category: 'operators',
@@ -1954,6 +1964,9 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('reifyReporter'));
         blocks.push(block('reifyPredicate'));
         blocks.push('#');
+        blocks.push('-');
+        blocks.push(block('reportNum'));
+        blocks.push(block('reportStr'));
         blocks.push('-');
         blocks.push(block('reportSum'));
         blocks.push(block('reportDifference'));
@@ -5610,6 +5623,9 @@ StageMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('reifyReporter'));
         blocks.push(block('reifyPredicate'));
         blocks.push('#');
+        blocks.push('-');
+        blocks.push(block('reportNum'));
+        blocks.push(block('reportStr'));
         blocks.push('-');
         blocks.push(block('reportSum'));
         blocks.push(block('reportDifference'));

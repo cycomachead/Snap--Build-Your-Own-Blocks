@@ -852,6 +852,9 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
         case '%s':
             part = new InputSlotMorph();
             break;
+        case '%sWrite':
+            part = new InputSlotMorph(null, false, null, false);
+            break;
         case '%anyUE':
             part = new InputSlotMorph();
             part.isUnevaluated = true;
@@ -876,6 +879,9 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
             break;
         case '%n':
             part = new InputSlotMorph(null, true);
+            break;
+        case '%nWrite':
+            part = new InputSlotMorph(null, true, null, false);
             break;
         case '%dir':
             part = new InputSlotMorph(
@@ -6900,7 +6906,7 @@ InputSlotMorph.prototype.init = function (
     this.choices = choiceDict || null; // object, function or selector
     this.oldContentsExtent = contents.extent();
     this.isNumeric = isNumeric || false;
-    this.isReadOnly = isReadOnly || false;
+    this.isReadOnly = isReadOnly !== undefined ? isReadOnly : true;
     this.minWidth = 0; // can be chaged for text-type inputs ("landscape")
     this.constant = null;
 

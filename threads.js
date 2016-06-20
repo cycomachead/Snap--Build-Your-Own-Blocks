@@ -2171,6 +2171,9 @@ Process.prototype.reportTypeOf = function (thing) {
 };
 
 // Process math primtives
+Process.prototype.reportNum = Process.prototype.reportStr = function (id) {
+    return id;
+};
 
 Process.prototype.reportSum = function (a, b) {
     return +a + (+b);
