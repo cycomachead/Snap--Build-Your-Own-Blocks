@@ -223,7 +223,7 @@ IDE_Morph.prototype.init = function (isAutoFill) {
     this.projectName = '';
     this.projectNotes = '';
 
-    this.logoURL = this.resourceURL('snap_logo_sm.png');
+    this.logoURL = this.resourceURL('snap_logo.svg');
     this.logo = null;
     this.controlBar = null;
     this.categories = null;
@@ -495,7 +495,7 @@ IDE_Morph.prototype.createLogo = function () {
     this.logo = new Morph();
     this.logo.texture = this.logoURL;
     this.logo.drawNew = function () {
-        this.image = newCanvas(this.extent());
+        this.image = newCanvas(new Point(200, 28));
         var context = this.image.getContext('2d'),
             gradient = context.createLinearGradient(
                 0,
@@ -507,7 +507,7 @@ IDE_Morph.prototype.createLogo = function () {
         gradient.addColorStop(0.5, myself.frameColor.toString());
         context.fillStyle = MorphicPreferences.isFlat ?
                 myself.frameColor.toString() : gradient;
-        context.fillRect(0, 0, this.width(), this.height());
+        context.fillRect(0, 0, 200, 28);
         if (this.texture) {
             this.drawTexture(this.texture);
         }
