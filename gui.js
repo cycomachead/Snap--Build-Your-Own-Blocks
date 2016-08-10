@@ -494,6 +494,14 @@ IDE_Morph.prototype.createLogo = function () {
 
     this.logo = new Morph();
     this.logo.texture = this.logoURL;
+    this.logo.drawTexture = function (url) {
+        var myself = this;
+        this.cachedTexture = new Image(200, 28);
+        this.cachedTexture.onload = function () {
+            myself.drawCachedTexture();
+        };
+        this.cachedTexture.src = this.texture = url; // make absolute
+    };
     this.logo.drawNew = function () {
         this.image = newCanvas(new Point(200, 28));
         var context = this.image.getContext('2d'),
@@ -518,7 +526,9 @@ IDE_Morph.prototype.createLogo = function () {
         context.drawImage(
             this.cachedTexture,
             5,
-            Math.round((this.height() - this.cachedTexture.height) / 2)
+            Math.round((this.height() - this.cachedTexture.height) / 2),
+            200,
+            28
         );
         this.changed();
     };
