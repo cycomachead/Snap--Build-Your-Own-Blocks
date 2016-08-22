@@ -50,13 +50,13 @@ modules.extensions = '2015-December-11';
 
 var ScriptLoader = {};
 
-ScriptLoader.loadFromURL = function(src, callback) {
+ScriptLoader.loadFromURL = function (src, callback) {
     var script = document.createElement('script');
     script.setAttribute('type', 'text/javascript');
     script.setAttribute('src', src);
     document.head.appendChild(script);
     script.onload = callback;
-}
+};
 
 // Scratch compatibility
 
@@ -70,22 +70,21 @@ var ScratchExtensions = {
     blocks: {}
 };
 
-ScratchExtensions.loadFromURL = function(url, callback, needsJQuery) {
+ScratchExtensions.loadFromURL = function (url, callback, needsJQuery) {
     if (needsJQuery) {
         ScriptLoader.loadFromURL(
                 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js', 
-                function() {
+                function () {
                     ScratchExtensions.loadFromURL(url, callback);
-                }
-                );
+                });
     } else {
         ScriptLoader.loadFromURL(url);
         document.removeEventListener('extensionLoaded'); 
-        document.addEventListener('extensionLoaded', callback)
+        document.addEventListener('extensionLoaded', callback);
     }
-}
+};
 
-ScratchExtensions.register = function(name, descriptor, extension) {
+ScratchExtensions.register = function (name, descriptor, extension) {
     var namespace = name.toLowerCase().replace(/[^a-z]/, '') + '_',
         category = name.length > 13 ? name.substring(0, 11) + '...' : name;
 
@@ -100,29 +99,28 @@ ScratchExtensions.register = function(name, descriptor, extension) {
 
     var event = new Event('extensionLoaded');
     document.dispatchEvent(event);
-}
+};
 
-ScratchExtensions.loadMethods = function(methodHolder, namespace) {
-    Object.keys(methodHolder).forEach(function(eachMethodName){
+ScratchExtensions.loadMethods = function (methodHolder, namespace) {
+    Object.keys(methodHolder).forEach(function (eachMethodName) {
         Process.prototype[namespace + eachMethodName] = methodHolder[eachMethodName];
-    })
-}
+    });
+};
 
-ScratchExtensions.loadMenus = function(menus) {
+ScratchExtensions.loadMenus = function (menus) {
     var myself = this;
 
     if (menus) {
-        Object.keys(menus).forEach(function(eachKey) {
+        Object.keys(menus).forEach(function (eachKey) {
             myself.menuOptions[eachKey] = {};
-            menus[eachKey].forEach(function(eachValue) {
+            menus[eachKey].forEach(function (eachValue) {
                 myself.menuOptions[eachKey][eachValue] = eachValue;
-            })
-        })
+            });
+        });
     }
-  
-}
+};
 
-ScratchExtensions.loadBlocks = function(blockSpecs, namespace, category) {
+ScratchExtensions.loadBlocks = function (blockSpecs, namespace, category) {
     /* 
        A BlockSpec is an array that holds an op code, a spec string, and a
        method name. Op codes are:
@@ -139,7 +137,7 @@ ScratchExtensions.loadBlocks = function(blockSpecs, namespace, category) {
 
     ScratchExtensions.blocks[category] = [];
 
-    blockSpecs.forEach(function(spec) {
+    blockSpecs.forEach(function (spec) {
         var op = spec[0],
             specString = spec[1],
             selector = namespace + spec[2],
@@ -192,5 +190,5 @@ ScratchExtensions.loadBlocks = function(blockSpecs, namespace, category) {
         } else { 
             console.log('missing method: ' + selector);
         }
-    })
-}
+    });
+};
