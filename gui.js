@@ -72,7 +72,7 @@ isRetinaSupported, SliderMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2016-October-31';
+modules.gui = '2016-November-14';
 
 // Declarations
 
@@ -451,6 +451,20 @@ IDE_Morph.prototype.openIn = function (world) {
                             myself.toggleAppMode(false);
                         }
                     ]);
+                },
+                this.cloudError()
+            );
+        } else if (location.hash.substr(0, 4) === '#dl:') {
+            myself.showMessage('Fetching project\nfrom the cloud...');
+
+            // make sure to lowercase the username
+            dict = SnapCloud.parseDict(location.hash.substr(4));
+            dict.Username = dict.Username.toLowerCase();
+
+            SnapCloud.getPublicProject(
+                SnapCloud.encodeDict(dict),
+                function (projectData) {
+                    window.open('data:text/xml,' + projectData);
                 },
                 this.cloudError()
             );
@@ -1947,7 +1961,8 @@ IDE_Morph.prototype.applySavedSettings = function () {
         plainprototype = this.getSetting('plainprototype'),
         keyboard = this.getSetting('keyboard'),
         tables = this.getSetting('tables'),
-        tableLines = this.getSetting('tableLines');
+        tableLines = this.getSetting('tableLines'),
+        autoWrapping = this.getSetting('autowrapping');
 
     // design
     if (design === 'flat') {
@@ -2006,6 +2021,13 @@ IDE_Morph.prototype.applySavedSettings = function () {
         TableMorph.prototype.highContrast = true;
     } else {
         TableMorph.prototype.highContrast = false;
+    }
+
+    // nested auto-wrapping
+    if (autoWrapping) {
+        ScriptsMorph.prototype.enableNestedAutoWrapping = true;
+    } else {
+        ScriptsMorph.prototype.enableNestedAutoWrapping = false;
     }
 
     // plain prototype labels
@@ -2507,6 +2529,22 @@ IDE_Morph.prototype.settingsMenu = function () {
         MorphicPreferences.isFlat,
         'uncheck for default\nGUI design',
         'check for alternative\nGUI design',
+        false
+    );
+    addPreference(
+        'Nested auto-wrapping',
+        function () {
+            ScriptsMorph.prototype.enableNestedAutoWrapping =
+                !ScriptsMorph.prototype.enableNestedAutoWrapping;
+            if (ScriptsMorph.prototype.enableNestedAutoWrapping) {
+                myself.saveSetting('autowrapping', true);
+            } else {
+                myself.removeSetting('autowrapping');
+            }
+        },
+        ScriptsMorph.prototype.enableNestedAutoWrapping,
+        'uncheck to confine auto-wrapping\nto top-level block stacks',
+        'check to enable auto-wrapping\ninside nested block stacks',
         false
     );
     addPreference(
@@ -3049,7 +3087,7 @@ IDE_Morph.prototype.aboutSnap = function () {
         module, btn1, btn2, btn3, btn4, licenseBtn, translatorsBtn,
         world = this.world();
 
-    aboutTxt = 'Snap! 4.0.9.1\nBuild Your Own Blocks\n\n'
+    aboutTxt = 'Snap! 4.0.10 - dev -\nBuild Your Own Blocks\n\n'
         + 'Copyright \u24B8 2016 Jens M\u00F6nig and '
         + 'Brian Harvey\n'
         + 'jens@moenig.org, bh@cs.berkeley.edu\n\n'
@@ -3579,13 +3617,13 @@ IDE_Morph.prototype.exportProjectSummary = function (useDropShadows) {
     pname = this.projectName || localize('untitled');
 
     html = new XML_Element('html');
+    html.attributes.lang = SnapTranslator.language;
     // html.attributes.contenteditable = 'true';
 
     head = addNode('head', html);
 
     meta = addNode('meta', head);
-    meta.attributes['http-equiv'] = 'Content-Type';
-    meta.attributes.content = 'text/html; charset=UTF-8';
+    meta.attributes.charset = 'UTF-8';
 
     if (useDropShadows) {
         css = 'img {' +
@@ -3752,7 +3790,7 @@ IDE_Morph.prototype.exportProjectSummary = function (useDropShadows) {
 
     this.saveFileAs(
         '<!DOCTYPE html>' + html.toString(),
-        'text/html;charset=utf-8,',
+        'text/html;charset=utf-8',
         pname,
         true // request opening a new window.
     );

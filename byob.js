@@ -108,7 +108,7 @@ WatcherMorph, Variable*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.byob = '2016-September-27';
+modules.byob = '2016-September-24';
 
 // Declarations
 

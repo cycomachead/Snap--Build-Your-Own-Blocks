@@ -82,7 +82,7 @@ SpeechBubbleMorph, RingMorph, isNil, FileReader, TableDialogMorph,
 BlockEditorMorph, BlockDialogMorph, PrototypeHatBlockMorph, localize,
 TableMorph, TableFrameMorph, normalizeCanvas, BooleanSlotMorph*/
 
-modules.objects = '2016-October-27';
+modules.objects = '2016-November-14';
 
 var SpriteMorph;
 var StageMorph;
@@ -5628,6 +5628,10 @@ StageMorph.prototype.fireKeyEvent = function (key) {
     if (evt === 'ctrl f') {
         if (!ide.isAppMode) {ide.currentSprite.searchBlocks(); }
         return;
+    }
+    if (evt === 'ctrl z') { //+++
+        if (!ide.isAppMode) {ide.currentSprite.scripts.undo(); }
+         return;
     }
     if (evt === 'ctrl n') {
         if (!ide.isAppMode) {ide.createNewProject(); }
