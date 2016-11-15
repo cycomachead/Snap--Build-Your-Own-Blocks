@@ -1268,29 +1268,12 @@ function newCanvas(extentPoint, nonRetina) {
 function getMinimumFontHeight() {
     // answer the height of the smallest font renderable in pixels
     var str = 'I',
-        size = 50,
         canvas = document.createElement('canvas'),
         ctx,
-        maxX,
-        data,
-        x,
-        y;
-    canvas.width = size;
-    canvas.height = size;
     ctx = canvas.getContext('2d');
-    ctx.font = '1px serif';
-    maxX = ctx.measureText(str).width;
-    ctx.fillStyle = 'black';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(str, 0, size);
-    for (y = 0; y < size; y += 1) {
-        for (x = 0; x < maxX; x += 1) {
-            data = ctx.getImageData(x, y, 1, 1);
-            if (data.data[3] !== 0) {
-                return size - y + 1;
-            }
-        }
-    }
+    //ctx.font = '1px serif';
+    // ctx.measureText(str).width;
+    ctx.drawText
     return 0;
 }
 
