@@ -42,7 +42,7 @@
 
 /*global modules, contains*/
 
-modules.locale = '2016-November-10';
+modules.locale = '2016-September-22';
 
 // Global stuff
 
@@ -160,7 +160,7 @@ SnapTranslator.dict.de = {
     'translator_e-mail':
         'jens@moenig.org',
     'last_changed':
-        '2016-11-10'
+        '2016-09-22'
 };
 
 SnapTranslator.dict.it = {
@@ -215,7 +215,7 @@ SnapTranslator.dict.pt = {
     'translator_e-mail':
         'mmsequeira@gmail.com',
     'last_changed':
-        '2016-10-30'
+        '2016-01-08'
 };
 
 SnapTranslator.dict.cs = {
@@ -259,7 +259,7 @@ SnapTranslator.dict.fr = {
     'translator_e-mail':
         'i.scool@mac.com',
     'last_changed':
-        '2016-10-27'
+        '2016-02-24'
 };
 
 SnapTranslator.dict.si = {
@@ -557,15 +557,4 @@ SnapTranslator.dict.et = {
         'hasso.tepper@gmail.com',
     'last_changed':
         '2016-05-03'
-};
-
-SnapTranslator.dict.gl = {
-    'language_name':
-        'Galego',
-    'language_translator':
-        'tecnoloxia',
-    'translator_e-mail':
-        '',
-    'last_changed':
-        '2016-11-09'
 };

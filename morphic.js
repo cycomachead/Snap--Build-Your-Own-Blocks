@@ -521,7 +521,7 @@
     create draggable composite morphs like Windows, DialogBoxes,
     Sliders etc.
 
-    Sometimes it is desireable to make "template" shapes which cannot be
+    Sometimes it is desirable to make "template" shapes which cannot be
     moved themselves, but from which instead duplicates can be peeled
     off. This is especially useful for building blocks in construction
     kits, e.g. the MIT-Scratch palette. Morphic.js lets you control this
@@ -1103,7 +1103,7 @@
 
 /*global window, HTMLCanvasElement, FileReader, Audio, FileList*/
 
-var morphicVersion = '2016-October-27';
+var morphicVersion = '2016-October-10';
 var modules = {}; // keep track of additional loaded modules
 var useBlurredShadows = getBlurredShadowSupport(); // check for Chrome-bug
 
@@ -1243,11 +1243,6 @@ function degrees(radians) {
 function fontHeight(height) {
     var minHeight = Math.max(height, MorphicPreferences.minimumFontHeight);
     return minHeight * 1.2; // assuming 1/5 font size for ascenders
-}
-
-function isWordChar(aCharacter) {
-    // can't use \b or \w because they ignore diacritics
-    return aCharacter.match(/[A-zÀ-ÿ0-9]/);
 }
 
 function newCanvas(extentPoint, nonRetina) {
@@ -4965,8 +4960,7 @@ CursorMorph.prototype.init = function (aStringOrTextMorph) {
 
 CursorMorph.prototype.initializeClipboardHandler = function () {
     // Add hidden text box for copying and pasting
-    var myself = this,
-        wrrld = this.target.world();
+    var myself = this;
 
     this.clipboardHandler = document.createElement('textarea');
     this.clipboardHandler.style.position = 'absolute';
@@ -4992,9 +4986,6 @@ CursorMorph.prototype.initializeClipboardHandler = function () {
         'keydown',
         function (event) {
             myself.processKeyDown(event);
-            if (event.shiftKey) {
-                wrrld.currentKey = 16;
-            }
             this.value = myself.target.selection();
             this.select();
 
@@ -5007,15 +4998,7 @@ CursorMorph.prototype.initializeClipboardHandler = function () {
         },
         false
     );
-
-    this.clipboardHandler.addEventListener(
-        'keyup',
-        function (event) {
-            wrrld.currentKey = null;
-        },
-        false
-    );
-
+    
     this.clipboardHandler.addEventListener(
         'input',
         function (event) {
@@ -5073,47 +5056,28 @@ CursorMorph.prototype.processKeyPress = function (event) {
 
 CursorMorph.prototype.processKeyDown = function (event) {
     // this.inspectKeyEvent(event);
-    var shift = event.shiftKey,
-        wordNavigation = event.ctrlKey || event.altKey,
-        selecting = this.target.selection().length > 0;
-
+    var shift = event.shiftKey;
     this.keyDownEventUsed = false;
     if (event.ctrlKey && (!event.altKey)) {
         this.ctrl(event.keyCode, event.shiftKey);
         // notify target's parent of key event
         this.target.escalateEvent('reactToKeystroke', event);
+        return;
     }
     if (event.metaKey) {
         this.cmd(event.keyCode, event.shiftKey);
         // notify target's parent of key event
         this.target.escalateEvent('reactToKeystroke', event);
+        return;
     }
 
     switch (event.keyCode) {
     case 37:
-        if (selecting && !shift && !wordNavigation) {
-            this.gotoSlot(Math.min(this.target.startMark, this.target.endMark));
-            this.target.clearSelection();
-        } else {
-            this.goLeft(
-                    shift,
-                    wordNavigation ?
-                        this.slot - this.target.previousWordFrom(this.slot)
-                        : 1);
-        }
+        this.goLeft(shift);
         this.keyDownEventUsed = true;
         break;
     case 39:
-        if (selecting && !shift && !wordNavigation) {
-            this.gotoSlot(Math.max(this.target.startMark, this.target.endMark));
-            this.target.clearSelection();
-        } else {
-            this.goRight(
-                    shift,
-                    wordNavigation ?
-                        this.target.nextWordFrom(this.slot) - this.slot
-                        : 1);
-        }
+        this.goRight(shift);
         this.keyDownEventUsed = true;
         break;
     case 38:
@@ -5204,9 +5168,9 @@ CursorMorph.prototype.gotoSlot = function (slot) {
     }
 };
 
-CursorMorph.prototype.goLeft = function (shift, howMany) {
+CursorMorph.prototype.goLeft = function (shift) {
     this.updateSelection(shift);
-    this.gotoSlot(this.slot - (howMany || 1));
+    this.gotoSlot(this.slot - 1);
     this.updateSelection(shift);
 };
 
@@ -5249,7 +5213,7 @@ CursorMorph.prototype.gotoPos = function (aPoint) {
 
 CursorMorph.prototype.updateSelection = function (shift) {
     if (shift) {
-        if (isNil(this.target.endMark) && isNil(this.target.startMark)) {
+        if (!this.target.endMark && !this.target.startMark) {
             this.target.startMark = this.slot;
             this.target.endMark = this.slot;
         } else if (this.target.endMark !== this.slot) {
@@ -7829,7 +7793,7 @@ StringMorph.prototype.renderWithBlanks = function (context, startX, y) {
     });
 };
 
-// StringMorph measuring:
+// StringMorph mesuring:
 
 StringMorph.prototype.slotPosition = function (slot) {
     // answer the position point of the given index ("slot")
@@ -7854,10 +7818,8 @@ StringMorph.prototype.slotPosition = function (slot) {
 };
 
 StringMorph.prototype.slotAt = function (aPoint) {
-    // answer the slot (index) closest to the given point taking
-    // in account how far from the middle of the character it is,
+    // answer the slot (index) closest to the given point
     // so the cursor can be moved accordingly
-
     var txt = this.isPassword ?
                 this.password('*', this.text.length) : this.text,
         idx = 0,
@@ -7875,14 +7837,7 @@ StringMorph.prototype.slotAt = function (aPoint) {
             }
         }
     }
-
-    // see where our click fell with respect to the middle of the char
-    if (aPoint.x - this.left() >
-            charX - context.measureText(txt[idx - 1]).width / 2) {
-        return idx;
-    } else {
-        return idx - 1;
-    }
+    return idx - 1;
 };
 
 StringMorph.prototype.upFrom = function (slot) {
@@ -7903,41 +7858,6 @@ StringMorph.prototype.startOfLine = function () {
 StringMorph.prototype.endOfLine = function () {
     // answer the slot (index) indicating the EOL for the given slot
     return this.text.length;
-};
-
-StringMorph.prototype.previousWordFrom = function (aSlot) {
-    // answer the slot (index) slots indicating the position of the
-    // previous word to the left of aSlot
-    var index = aSlot - 1;
-    
-    // while the current character is non-word one, we skip it, so that
-    // if we are in the middle of a non-alphanumeric sequence, we'll get
-    // right to the beginning of the previous word
-    while (index > 0 && !isWordChar(this.text[index])) {
-        index -= 1;
-    }
-
-    // while the current character is a word one, we skip it until we
-    // find the beginning of the current word
-    while (index > 0 && isWordChar(this.text[index - 1])) {
-        index -= 1;
-    }
-
-    return index;
-};
-
-StringMorph.prototype.nextWordFrom = function (aSlot) {
-    var index = aSlot;
-    
-    while (index < this.endOfLine() && !isWordChar(this.text[index])) {
-        index += 1;
-    }
-
-    while (index < this.endOfLine() && isWordChar(this.text[index])) {
-        index += 1;
-    }
-
-    return index;
 };
 
 StringMorph.prototype.rawHeight = function () {
@@ -8105,13 +8025,13 @@ StringMorph.prototype.selectionStartSlot = function () {
 
 StringMorph.prototype.clearSelection = function () {
     if (!this.currentlySelecting &&
-            isNil(this.startMark) &&
-            isNil(this.endMark)) {
+            this.startMark === 0 &&
+            this.endMark === 0) {
         return;
     }
     this.currentlySelecting = false;
-    this.startMark = null;
-    this.endMark = null;
+    this.startMark = 0;
+    this.endMark = 0;
     this.drawNew();
     this.changed();
 };
@@ -8127,13 +8047,8 @@ StringMorph.prototype.deleteSelection = function () {
 };
 
 StringMorph.prototype.selectAll = function () {
-    var cursor;
     if (this.isEditable) {
         this.startMark = 0;
-        cursor = this.root().cursor;
-        if (cursor) {
-            cursor.gotoSlot(this.text.length);
-        }
         this.endMark = this.text.length;
         this.drawNew();
         this.changed();
@@ -8141,29 +8056,11 @@ StringMorph.prototype.selectAll = function () {
 };
 
 StringMorph.prototype.mouseDownLeft = function (pos) {
-    if (this.world().currentKey === 16) {
-        this.shiftClick(pos);
-    } else if (this.isEditable) {
+    if (this.isEditable) {
         this.clearSelection();
     } else {
         this.escalateEvent('mouseDownLeft', pos);
     }
-};
-
-StringMorph.prototype.shiftClick = function (pos) {
-    var cursor = this.root().cursor;
-
-    if (cursor) {
-        if (!this.startMark) {
-            this.startMark = cursor.slot;
-        }
-        cursor.gotoPos(pos);
-        this.endMark = cursor.slot;
-        this.drawNew();
-        this.changed();
-    }
-    this.currentlySelecting = false;
-    this.escalateEvent('mouseDownLeft', pos);
 };
 
 StringMorph.prototype.mouseClickLeft = function (pos) {
@@ -8182,79 +8079,18 @@ StringMorph.prototype.mouseClickLeft = function (pos) {
     }
 };
 
-StringMorph.prototype.mouseDoubleClick = function (pos) {
-    // selects the word at pos
-    // if there is no word, we select whatever is between
-    // the previous and next words
-    var slot = this.slotAt(pos);
-
-    if (this.isEditable) {
-        this.edit();
-
-        if (slot === this.text.length) {
-            slot -= 1;
-        }
-
-        if (isWordChar(this.text[slot])) {
-            this.selectWordAt(slot);
-        } else {
-            this.selectBetweenWordsAt(slot);
-        }
-    } else {
-        this.escalateEvent('mouseDoubleClick', pos);
-    }
- 
-};
-
-StringMorph.prototype.selectWordAt = function (slot) {
-    var cursor = this.root().cursor;
-
-    if (slot === 0 || isWordChar(this.text[slot - 1])) {
-        cursor.gotoSlot(this.previousWordFrom(slot));
-        this.startMark = cursor.slot;
-        this.endMark = this.nextWordFrom(cursor.slot);
-    } else {
-        cursor.gotoSlot(slot);
-        this.startMark = slot;
-        this.endMark = this.nextWordFrom(slot);
-    }
-
-    this.drawNew();
-    this.changed();
-};
-
-StringMorph.prototype.selectBetweenWordsAt = function (slot) {
-    var cursor = this.root().cursor;
-
-    cursor.gotoSlot(this.nextWordFrom(this.previousWordFrom(slot)));
-    this.startMark = cursor.slot;
-    this.endMark = cursor.slot;
-
-    while (this.endMark < this.text.length
-            && !isWordChar(this.text[this.endMark])) {
-        this.endMark += 1;
-    }
-
-    this.drawNew();
-    this.changed();
-};
-
 StringMorph.prototype.enableSelecting = function () {
     this.mouseDownLeft = function (pos) {
         var crs = this.root().cursor,
             already = crs ? crs.target === this : false;
-        if (this.world().currentKey === 16) {
-            this.shiftClick(pos);
-        } else {
-            this.clearSelection();
-            if (this.isEditable && (!this.isDraggable)) {
-                this.edit();
-                this.root().cursor.gotoPos(pos);
-                this.startMark = this.slotAt(pos);
-                this.endMark = this.startMark;
-                this.currentlySelecting = true;
-                if (!already) {this.escalateEvent('mouseDownLeft', pos); }
-            }
+        this.clearSelection();
+        if (this.isEditable && (!this.isDraggable)) {
+            this.edit();
+            this.root().cursor.gotoPos(pos);
+            this.startMark = this.slotAt(pos);
+            this.endMark = this.startMark;
+            this.currentlySelecting = true;
+            if (!already) {this.escalateEvent('mouseDownLeft', pos); }
         }
     };
     this.mouseMove = function (pos) {
@@ -8574,10 +8410,8 @@ TextMorph.prototype.slotPosition = function (slot) {
 };
 
 TextMorph.prototype.slotAt = function (aPoint) {
-    // answer the slot (index) closest to the given point taking
-    // in account how far from the middle of the character it is,
+    // answer the slot (index) closest to the given point
     // so the cursor can be moved accordingly
-
     var charX = 0,
         row = 0,
         col = 0,
@@ -8589,19 +8423,11 @@ TextMorph.prototype.slotAt = function (aPoint) {
         row += 1;
     }
     row = Math.max(row, 1);
-
     while (aPoint.x - this.left() > charX) {
         charX += context.measureText(this.lines[row - 1][col]).width;
         col += 1;
     }
-
-    // see where our click fell with respect to the middle of the char
-    if (aPoint.x - this.left() >
-            charX - context.measureText(this.lines[row - 1][col]).width / 2) {
-        return this.lineSlots[Math.max(row - 1, 0)] + col;
-    } else {
-        return this.lineSlots[Math.max(row - 1, 0)] + col - 1;
-    }
+    return this.lineSlots[Math.max(row - 1, 0)] + col - 1;
 };
 
 TextMorph.prototype.upFrom = function (slot) {
@@ -8643,10 +8469,6 @@ TextMorph.prototype.endOfLine = function (slot) {
         this.lines[this.columnRow(slot).y].length - 1;
 };
 
-TextMorph.prototype.previousWordFrom = StringMorph.prototype.previousWordFrom;
-
-TextMorph.prototype.nextWordFrom = StringMorph.prototype.nextWordFrom;
-
 // TextMorph editing:
 
 TextMorph.prototype.edit = StringMorph.prototype.edit;
@@ -8664,16 +8486,7 @@ TextMorph.prototype.selectAll = StringMorph.prototype.selectAll;
 
 TextMorph.prototype.mouseDownLeft = StringMorph.prototype.mouseDownLeft;
 
-TextMorph.prototype.shiftClick = StringMorph.prototype.shiftClick;
-
 TextMorph.prototype.mouseClickLeft = StringMorph.prototype.mouseClickLeft;
-
-TextMorph.prototype.mouseDoubleClick = StringMorph.prototype.mouseDoubleClick;
-
-TextMorph.prototype.selectWordAt = StringMorph.prototype.selectWordAt;
-
-TextMorph.prototype.selectBetweenWordsAt
-    = StringMorph.prototype.selectBetweenWordsAt;
 
 TextMorph.prototype.enableSelecting = StringMorph.prototype.enableSelecting;
 
@@ -10756,8 +10569,8 @@ WorldMorph.prototype.init = function (aCanvas, fillPage) {
     this.broken = [];
     this.hand = new HandMorph(this);
     this.keyboardReceiver = null;
-    this.cursor = null;
     this.lastEditedText = null;
+    this.cursor = null;
     this.activeMenu = null;
     this.activeHandle = null;
     this.virtualKeyboard = null;
@@ -11521,6 +11334,9 @@ WorldMorph.prototype.edit = function (aStringOrTextMorph) {
     if (this.cursor) {
         this.cursor.destroy();
     }
+    if (this.lastEditedText) {
+        this.lastEditedText.clearSelection();
+    }
     this.cursor = new CursorMorph(aStringOrTextMorph);
     aStringOrTextMorph.parent.add(this.cursor);
     this.keyboardReceiver = this.cursor;
@@ -11538,11 +11354,6 @@ WorldMorph.prototype.edit = function (aStringOrTextMorph) {
             this.slide(aStringOrTextMorph);
         }
     }
-
-    if (this.lastEditedText !== aStringOrTextMorph) {
-        aStringOrTextMorph.escalateEvent('freshTextEdit', aStringOrTextMorph);
-    }
-    this.lastEditedText = aStringOrTextMorph;
 };
 
 WorldMorph.prototype.slide = function (aStringOrTextMorph) {
@@ -11588,10 +11399,10 @@ WorldMorph.prototype.slide = function (aStringOrTextMorph) {
 
 WorldMorph.prototype.stopEditing = function () {
     if (this.cursor) {
-        this.cursor.target.escalateEvent('reactToEdit', this.cursor.target);
-        this.cursor.target.clearSelection();
+        this.lastEditedText = this.cursor.target;
         this.cursor.destroy();
         this.cursor = null;
+        this.lastEditedText.escalateEvent('reactToEdit', this.lastEditedText);
     }
     this.keyboardReceiver = null;
     if (this.virtualKeyboard) {
@@ -11599,7 +11410,6 @@ WorldMorph.prototype.stopEditing = function () {
         document.body.removeChild(this.virtualKeyboard);
         this.virtualKeyboard = null;
     }
-    this.lastEditedText = null;
     this.worldCanvas.focus();
 };
 
