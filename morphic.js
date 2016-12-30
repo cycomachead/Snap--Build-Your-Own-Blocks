@@ -5186,6 +5186,12 @@ CursorMorph.prototype.initializeClipboardHandler = function () {
     this.clipboardHandler = document.createElement('textarea');
     this.clipboardHandler.style.position = 'absolute';
     this.clipboardHandler.style.right = '101%'; // placed just out of view
+    // disable all the possible autocomplete variations.
+    this.clipboardHandler.spellcheck = false;
+    this.clipboardHandler.autocapitalize = "off";
+    this.clipboardHandler.autocorrect = "off";
+    this.clipboardHandler.autocomplete = "off";
+    this.clipboardHandler.autosuggest = "off";
 
     document.body.appendChild(this.clipboardHandler);
 
@@ -11184,7 +11190,12 @@ WorldMorph.prototype.initVirtualKeyboard = function () {
     this.virtualKeyboard.style.left = "0px";
     this.virtualKeyboard.style.width = "0px";
     this.virtualKeyboard.style.height = "0px";
-    this.virtualKeyboard.autocapitalize = "none"; // iOS specific
+    // Disable all browser "suggestion" features
+    this.virtualKeyboard.autocapitalize = "off";
+    this.virtualKeyboard.autocorrect = "off";
+    this.virtualKeyboard.autocomplete = "off";
+    this.virtualKeyboard.autosuggest = "off";
+    this.virtualKeyboard.spellcheck = "false";
     document.body.appendChild(this.virtualKeyboard);
 
     this.virtualKeyboard.addEventListener(
