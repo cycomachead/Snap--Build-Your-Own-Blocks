@@ -82,7 +82,7 @@ SpeechBubbleMorph, RingMorph, isNil, FileReader, TableDialogMorph,
 BlockEditorMorph, BlockDialogMorph, PrototypeHatBlockMorph, localize,
 TableMorph, TableFrameMorph, normalizeCanvas, BooleanSlotMorph*/
 
-modules.objects = '2017-January-19';
+modules.objects = '2017-February-02';
 
 var SpriteMorph;
 var StageMorph;
@@ -1185,12 +1185,20 @@ SpriteMorph.prototype.initBlocks = function () {
             category: 'other',
             spec: 'map %cmdRing to %codeKind %code'
         },
+        doMapValueCode: { // experimental
+            type: 'command',
+            category: 'other',
+            spec: 'map %mapValue to code %code',
+            defaults: [['String'], '<#1>']
+        },
+    /* obsolete - superseded by 'doMapValue'
         doMapStringCode: { // experimental
             type: 'command',
             category: 'other',
             spec: 'map String to code %code',
             defaults: ['<#1>']
         },
+    */
         doMapListCode: { // experimental
             type: 'command',
             category: 'other',
@@ -1231,6 +1239,11 @@ SpriteMorph.prototype.initBlockMigrations = function () {
         reportFalse: {
             selector: 'reportBoolean',
             inputs: [false]
+        },
+        doMapStringCode: {
+            selector: 'doMapValueCode',
+            inputs: [['String'], '<#1>'],
+            offset: 1
         }
     };
 };
@@ -2159,7 +2172,7 @@ SpriteMorph.prototype.blockTemplates = function (category) {
 
         if (StageMorph.prototype.enableCodeMapping) {
             blocks.push(block('doMapCodeOrHeader'));
-            blocks.push(block('doMapStringCode'));
+            blocks.push(block('doMapValueCode'));
             blocks.push(block('doMapListCode'));
             blocks.push('-');
             blocks.push(block('reportMappedCode'));
@@ -2403,6 +2416,28 @@ SpriteMorph.prototype.freshPalette = function (category) {
             y += block.height();
         }
     });
+
+    // inherited custom blocks: (under construction...)
+    // y += unit * 1.6;
+    if (this.exemplar) {
+        this.inheritedBlocks(true).forEach(function (definition) {
+            var block;
+            if (definition.category === category ||
+                    (category === 'variables'
+                        && contains(
+                            ['lists', 'other'],
+                            definition.category
+                        ))) {
+                block = definition.templateInstance();
+                y += unit * 0.3;
+                block.setPosition(new Point(x, y));
+                palette.addContents(block);
+                block.ghost();
+                x = 0;
+                y += block.height();
+            }
+        });
+    }
 
     //layout
 
@@ -4409,6 +4444,25 @@ SpriteMorph.prototype.reportThreadCount = function () {
     return 0;
 };
 
+// SpriteMorph variable refactoring
+
+SpriteMorph.prototype.refactorVariableInstances = function (
+    oldName,
+    newName,
+    isGlobal
+) {
+    if (isGlobal && this.hasSpriteVariable(oldName)) {
+        return;
+    }
+
+    this.scripts.children.forEach(function (child) {
+        if (child instanceof BlockMorph) {
+            child.refactorVarInStack(oldName, newName);
+        }
+    });
+
+};
+
 // SpriteMorph variable watchers (for palette checkbox toggling)
 
 SpriteMorph.prototype.findVariableWatcher = function (varName) {
@@ -4874,29 +4928,8 @@ SpriteMorph.prototype.hasSpriteVariable = function (varName) {
     return contains(this.variables.names(), varName);
 };
 
-// Variable refactoring
-
-SpriteMorph.prototype.refactorVariableInstances = function (
-    oldName,
-    newName,
-    isGlobal
-) {
-    if (isGlobal && this.hasSpriteVariable(oldName)) {
-        return;
-    }
-
-    this.scripts.children.forEach(function (child) {
-        if (child instanceof BlockMorph) {
-            child.refactorVarInStack(oldName, newName);
-        }
-    });
-
-};
-
 // SpriteMorph inheritance - custom blocks
-
-/*
-// under construction, commented out for now
+// under construction
 
 SpriteMorph.prototype.ownBlocks = function () {
     var dict = {};
@@ -4937,8 +4970,6 @@ SpriteMorph.prototype.inheritedBlocks = function (valuesOnly) {
     }
     return dict;
 };
-
-*/
 
 // SpriteMorph thumbnail
 
@@ -6399,7 +6430,7 @@ StageMorph.prototype.blockTemplates = function (category) {
 
         if (StageMorph.prototype.enableCodeMapping) {
             blocks.push(block('doMapCodeOrHeader'));
-            blocks.push(block('doMapStringCode'));
+            blocks.push(block('doMapValueCode'));
             blocks.push(block('doMapListCode'));
             blocks.push('-');
             blocks.push(block('reportMappedCode'));
