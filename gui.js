@@ -3487,6 +3487,75 @@ IDE_Morph.prototype.rawSaveProject = function (name) {
     }
 };
 
+IDE_Morph.prototype.rawSaveCloudProject = function (thumbnail, isPublic) {
+    var myself = this, mediaXML, projectXML, mediaSize, size;
+
+    function toBinaryBuffer (string) {
+        var buffer = new ArrayBuffer(string.length * 2),
+            bufferView = new Uint8Array(buffer);
+        
+        for (var i = 0; i < string.length; i++) {
+            bufferView[i] = string.charCodeAt(i);
+        }
+
+        return buffer;
+    };
+
+    this.serializer.isCollectingMedia = true;
+    projectXML = this.serializer.serialize(this.stage);
+    mediaXML = this.hasChangedMedia ?
+        this.serializer.mediaXML(this.projectName) : null;
+    this.serializer.isCollectingMedia = false;
+    this.serializer.flushMedia();
+
+    mediaSize = mediaXML ? mediaXML.length : 0;
+    size = projectXML.length + mediaSize;
+
+    if (mediaSize > 10485760) {
+        new DialogBoxMorph().inform(
+            'Snap!Cloud - Cannot Save Project',
+            'The media inside this project exceeds 10 MB.\n' +
+                'Please reduce the size of costumes or sounds.\n',
+            this.world(),
+            this.cloudIcon(null, new Color(180, 0, 0))
+        );
+        throw new Error('Project media exceeds 10 MB size limit');
+    }
+
+    // check if serialized data can be parsed back again
+    try {
+        this.serializer.parse(projectXML);
+    } catch (err) {
+        this.showMessage('Serialization of program data failed:\n' + err);
+        throw new Error('Serialization of program data failed:\n' + err);
+    }
+    if (mediaXML !== null) {
+        try {
+            this.serializer.parse(mediaXML);
+        } catch (err) {
+            this.showMessage('Serialization of media failed:\n' + err);
+            throw new Error('Serialization of media failed:\n' + err);
+        }
+    }
+
+    this.showMessage('Saving project\nto the cloud...');
+
+    SnapAPI.saveMyProject(
+        this.projectName,
+        toBinaryBuffer(projectXML),
+        isPublic ? 'true' : 'false',
+        mediaXML !== null, // is media present
+        this.projectNotes,
+        toBinaryBuffer(thumbnail),
+        toBinaryBuffer(mediaXML))
+        .then(function () {
+            myself.source = 'cloud';
+            myself.showMessage('saved.', 2);
+        })
+        .catch(function (err) {
+            myself.cloudError().call(myself, err.ResultMessage || err);
+        });
+};
 
 IDE_Morph.prototype.exportProject = function (name, plain, newWindow) {
     // Export project XML, saving a file to disk
@@ -5884,13 +5953,12 @@ ProjectDialogMorph.prototype.rawOpenCloudProject = function (proj) {
 
             if (project.public) {
                 location.hash = '#present:Username=' +
-                encodeURIComponent(project.loginName) +
-                '&ProjectName=' +
-                encodeURIComponent(project.projectName);
+                    encodeURIComponent(project.loginName) +
+                    '&ProjectName=' +
+                    encodeURIComponent(project.projectName);
             }
         })
         .catch(function (err) {
-            console.log(err);
             myself.ide.cloudError().call(null, err.ResultMessage || err);
         });
     this.destroy();
@@ -5950,16 +6018,10 @@ ProjectDialogMorph.prototype.saveProject = function () {
 };
 
 ProjectDialogMorph.prototype.saveCloudProject = function () {
-    var myself = this;
-    this.ide.showMessage('Saving project\nto the cloud...');
-    SnapCloud.saveProject(
-        this.ide,
-        function () {
-            myself.ide.source = 'cloud';
-            myself.ide.showMessage('saved.', 2);
-        },
-        this.ide.cloudError()
-    );
+    this.ide.rawSaveCloudProject(
+        this.preview.fullImageClassic().toDataURL(),
+        this.listField.selected.public 
+        );
     this.destroy();
 };
 
@@ -5978,25 +6040,16 @@ ProjectDialogMorph.prototype.deleteProject = function () {
                 ) + '\n"' + proj.projectName + '"?',
                 'Delete Project',
                 function () {
-                    SnapCloud.reconnect(
-                        function () {
-                            SnapCloud.callService(
-                                'deleteProject',
-                                function () {
-                                    SnapCloud.disconnect();
-                                    myself.ide.hasChangedMedia = true;
-                                    idx = myself.projectList.indexOf(proj);
-                                    myself.projectList.splice(idx, 1);
-                                    myself.installCloudProjectList(
-                                        myself.projectList
-                                    ); // refresh list
-                                },
-                                myself.ide.cloudError(),
-                                [proj.projectName]
-                            );
-                        },
-                        myself.ide.cloudError()
-                    );
+                    SnapAPI.deleteMyProject(proj.projectName)
+                        .then(function () {
+                            myself.ide.hasChangedMedia = true;
+                            idx = myself.projectList.indexOf(proj);
+                            myself.projectList.splice(idx, 1);
+                            myself.installCloudProjectList(myself.projectList); // refresh list
+                        })
+                        .catch(function (err) {
+                            ide.cloudError().call(ide, err.ResultMessage || err);
+                        });
                 }
             );
         }
@@ -6031,37 +6084,32 @@ ProjectDialogMorph.prototype.shareProject = function () {
             'Share Project',
             function () {
                 myself.ide.showMessage('sharing\nproject...');
-                SnapCloud.reconnect(
-                    function () {
-                        SnapCloud.callService(
-                            'publishProject',
-                            function () {
-                                SnapCloud.disconnect();
-                                proj.public = true;
-                                myself.unshareButton.show();
-                                myself.shareButton.hide();
-                                entry.label.isBold = true;
-                                entry.label.drawNew();
-                                entry.label.changed();
-                                myself.buttons.fixLayout();
-                                myself.drawNew();
-                                myself.ide.showMessage('shared.', 2);
-                            },
-                            myself.ide.cloudError(),
-                            [proj.projectName]
-                        );
+                SnapAPI.publishMyProject(proj.projectName)
+                    .then(function () {
+                        proj.public = true;
+                        myself.unshareButton.show();
+                        myself.shareButton.hide();
+                        entry.label.isBold = true;
+                        entry.label.drawNew();
+                        entry.label.changed();
+                        myself.buttons.fixLayout();
+                        myself.drawNew();
+                        myself.ide.showMessage('shared.', 2);
+                    })
+                    .then(function () {
                         // Set the Shared URL if the project is currently open
                         if (proj.projectName === ide.projectName) {
-                            var usr = SnapCloud.username,
+                            var usr = SnapAPI.currentUser(),
                                 projectId = 'Username=' +
                                     encodeURIComponent(usr.toLowerCase()) +
                                     '&ProjectName=' +
                                     encodeURIComponent(proj.projectName);
                             location.hash = 'present:' + projectId;
                         }
-                    },
-                    myself.ide.cloudError()
-                );
+                    })
+                    .catch(function (err) {
+                        myself.cloudError().call(myself, err.ResultMessage || err);
+                    });
             }
         );
     }
@@ -6073,41 +6121,29 @@ ProjectDialogMorph.prototype.unshareProject = function () {
         proj = this.listField.selected,
         entry = this.listField.active;
 
-
     if (proj) {
         this.ide.confirm(
             localize(
                 'Are you sure you want to unpublish'
-            ) + '\n"' + proj.projectName + '"?',
+                ) + '\n"' + proj.projectName + '"?',
             'Unshare Project',
             function () {
                 myself.ide.showMessage('unsharing\nproject...');
-                SnapCloud.reconnect(
-                    function () {
-                        SnapCloud.callService(
-                            'unpublishProject',
-                            function () {
-                                SnapCloud.disconnect();
-                                proj.public = 'false';
-                                myself.shareButton.show();
-                                myself.unshareButton.hide();
-                                entry.label.isBold = false;
-                                entry.label.drawNew();
-                                entry.label.changed();
-                                myself.buttons.fixLayout();
-                                myself.drawNew();
-                                myself.ide.showMessage('unshared.', 2);
-                            },
-                            myself.ide.cloudError(),
-                            [proj.projectName]
-                        );
-                        // Remove the shared URL if the project is open.
-                        if (proj.projectName === ide.projectName) {
-                            location.hash = '';
-                        }
-                    },
-                    myself.ide.cloudError()
-                );
+                SnapAPI.unpublishMyProject(proj.projectName)
+                    .then(function () {
+                        proj.public = false;
+                        myself.shareButton.show();
+                        myself.unshareButton.hide();
+                        entry.label.isBold = false;
+                        entry.label.drawNew();
+                        entry.label.changed();
+                        myself.buttons.fixLayout();
+                        myself.drawNew();
+                        myself.ide.showMessage('unshared.', 2);
+                    })
+                    .catch(function (err) {
+                        myself.cloudError().call(myself, err.ResultMessage || err);
+                    }); 
             }
         );
     }
