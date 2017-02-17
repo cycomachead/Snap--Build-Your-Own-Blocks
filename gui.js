@@ -386,7 +386,7 @@ IDE_Morph.prototype.openIn = function (world) {
     */
 
     function interpretUrlAnchors() {
-        var dict, idx;
+        var dict, idx, msg;
 
         if (location.hash.substr(0, 6) === '#open:') {
             hash = location.hash.substr(6);
@@ -433,35 +433,31 @@ IDE_Morph.prototype.openIn = function (world) {
             dict = SnapAPI.parseDict(location.hash.substr(9));
             dict.Username = dict.Username.toLowerCase();
 
-            SnapCloud.getPublicProject(
-                SnapCloud.encodeDict(dict),
-                function (projectData) {
-                    var msg;
-                    myself.nextSteps([
-                        function () {
-                            msg = myself.showMessage('Opening project...');
-                        },
-                        function () {nop(); }, // yield (bug in Chrome)
-                        function () {
-                            if (projectData.indexOf('<snapdata') === 0) {
-                                myself.rawOpenCloudDataString(projectData);
-                            } else if (
-                                projectData.indexOf('<project') === 0
-                            ) {
-                                myself.rawOpenProjectString(projectData);
-                            }
-                            myself.hasChangedMedia = true;
-                        },
-                        function () {
-                            myself.shield.destroy();
-                            myself.shield = null;
-                            msg.destroy();
-                            applyFlags(dict);
+            SnapAPI.getPublicProject(dict.Username, dict.ProjectName)
+                .then(function (response) {
+                    msg = myself.showMessage('Opening project...');
+                    return response.PublicProject;
+                })
+                .then(function (project) {
+                    var xml = String.fromCharCode.apply(String, project.sourceCode);
+                    if (xml.indexOf('<snapdata') === 0) {
+                        myself.rawOpenCloudDataString(xml);
+                    } else if (
+                        xml.indexOf('<project') === 0
+                        ) {
+                            myself.rawOpenProjectString(xml);
                         }
-                    ]);
-                },
-                this.cloudError()
-            );
+                    myself.hasChangedMedia = true;
+                })
+                .then(function () {
+                    myself.shield.destroy();
+                    myself.shield = null;
+                    msg.destroy();
+                    applyFlags(dict);
+                })
+                .catch(function (err) {
+                    myself.cloudError().call(null, err.ResultMessage || err);
+                });
         } else if (location.hash.substr(0, 7) === '#cloud:') {
             this.shield = new Morph();
             this.shield.alpha = 0;
@@ -470,52 +466,51 @@ IDE_Morph.prototype.openIn = function (world) {
             myself.showMessage('Fetching project\nfrom the cloud...');
 
             // make sure to lowercase the username
-            dict = SnapCloud.parseDict(location.hash.substr(7));
+            dict = SnapAPI.parseDict(location.hash.substr(7));
             dict.Username = dict.Username.toLowerCase();
-
-            SnapCloud.getPublicProject(
-                SnapCloud.encodeDict(dict),
-                function (projectData) {
-                    var msg;
-                    myself.nextSteps([
-                        function () {
-                            msg = myself.showMessage('Opening project...');
-                        },
-                        function () {nop(); }, // yield (bug in Chrome)
-                        function () {
-                            if (projectData.indexOf('<snapdata') === 0) {
-                                myself.rawOpenCloudDataString(projectData);
-                            } else if (
-                                projectData.indexOf('<project') === 0
-                            ) {
-                                myself.rawOpenProjectString(projectData);
-                            }
-                            myself.hasChangedMedia = true;
-                        },
-                        function () {
-                            myself.shield.destroy();
-                            myself.shield = null;
-                            msg.destroy();
-                            myself.toggleAppMode(false);
+            
+            SnapAPI.getPublicProject(dict.Username, dict.ProjectName)
+                .then(function (response) {
+                    msg = myself.showMessage('Opening project...');
+                    return response.PublicProject;
+                })
+                .then(function (project) {
+                    var xml = String.fromCharCode.apply(String, project.sourceCode);
+                    if (xml.indexOf('<snapdata') === 0) {
+                        myself.rawOpenCloudDataString(xml);
+                    } else if (
+                        xml.indexOf('<project') === 0
+                        ) {
+                            myself.rawOpenProjectString(xml);
                         }
-                    ]);
-                },
-                this.cloudError()
-            );
+                    myself.hasChangedMedia = true;
+                })
+                .then(function () {
+                    myself.shield.destroy();
+                    myself.shield = null;
+                    msg.destroy();
+                    myself.toggleAppMode(false);
+                })
+                .catch(function (err) { 
+                    myself.cloudError().call(null, err.ResultMessage || err);
+                });
         } else if (location.hash.substr(0, 4) === '#dl:') {
-            myself.showMessage('Fetching project\nfrom the cloud...');
+            msg = myself.showMessage('Fetching project\nfrom the cloud...');
 
             // make sure to lowercase the username
-            dict = SnapCloud.parseDict(location.hash.substr(4));
+            dict = SnapAPI.parseDict(location.hash.substr(4));
             dict.Username = dict.Username.toLowerCase();
 
-            SnapCloud.getPublicProject(
-                SnapCloud.encodeDict(dict),
-                function (projectData) {
-                    window.open('data:text/xml,' + projectData);
-                },
-                this.cloudError()
-            );
+            SnapAPI.getPublicProject(dict.Username, dict.ProjectName)
+                .then(function (response) {
+                    var project = response.PublicProject,
+                        xml = String.fromCharCode.apply(String, project.sourceCode);
+                    msg.destroy();
+                    window.open('data:text/xml,' + xml);
+                })
+                .catch(function (err) { 
+                    myself.cloudError().call(null, err.ResultMessage || err);
+                });
         } else if (location.hash.substr(0, 6) === '#lang:') {
             urlLanguage = location.hash.substr(6);
             this.setLanguage(urlLanguage);
@@ -2288,9 +2283,12 @@ IDE_Morph.prototype.cloudMenu = function () {
         world = this.world(),
         pos = this.controlBar.cloudButton.bottomLeft(),
         currentUser = SnapAPI.currentUser(),
-        shiftClicked = (world.currentKey === 16);
+        shiftClicked = (world.currentKey === 16),
+        msg;
 
     menu = new MenuMorph(this);
+    // TODO
+    /*
     if (shiftClicked) {
         menu.addItem(
             'url...',
@@ -2300,6 +2298,7 @@ IDE_Morph.prototype.cloudMenu = function () {
         );
         menu.addLine();
     }
+    */
     if (!currentUser) {
         menu.addItem(
             'Login...',
@@ -2373,41 +2372,30 @@ IDE_Morph.prototype.cloudMenu = function () {
             function () {
                 myself.prompt('Author name…', function (usr) {
                     myself.prompt('Project name...', function (prj) {
-                        var id = 'Username=' +
-                            encodeURIComponent(usr.toLowerCase()) +
-                            '&ProjectName=' +
-                            encodeURIComponent(prj);
                         myself.showMessage(
                             'Fetching project\nfrom the cloud...'
                         );
-                        SnapCloud.getPublicProject(
-                            id,
-                            function (projectData) {
-                                var msg;
+                        SnapAPI.getPublicProject(usr.toLowerCase(), prj)
+                            .then(function (response) {
+                                var project = response.PublicProject,
+                                    xml = String.fromCharCode.apply(String, project.sourceCode);
                                 if (!Process.prototype.isCatchingErrors) {
-                                    window.open(
-                                        'data:text/xml,' + projectData
-                                    );
+                                    window.open('data:text/xml,' + xml);
                                 }
-                                myself.nextSteps([
-                                    function () {
-                                        msg = myself.showMessage(
-                                            'Opening project...'
-                                        );
-                                    },
-                                    function () {nop(); }, // yield (Chrome)
-                                    function () {
-                                        myself.rawOpenCloudDataString(
-                                            projectData
-                                        );
-                                    },
-                                    function () {
-                                        msg.destroy();
-                                    }
-                                ]);
-                            },
-                            myself.cloudError()
-                        );
+                                return xml;
+                            })
+                            .then(function (xml) {
+                                msg = myself.showMessage(
+                                    'Opening project...'
+                                    );
+                                myself.rawOpenProjectString(xml);
+                            })
+                            .then(function () {
+                                msg.destroy();
+                            })
+                            .catch(function (err) {
+                                myself.cloudError().call(null, err.ResultMessage || err);
+                            });
 
                     }, null, 'project');
                 }, null, 'project');
@@ -3521,7 +3509,7 @@ IDE_Morph.prototype.rawSaveProject = function (name) {
     }
 };
 
-IDE_Morph.prototype.rawSaveProjectToCloud = function (thumbnail, isPublic) {
+IDE_Morph.prototype.rawSaveProjectToCloud = function (thumbnail) {
     var myself = this, mediaXML, projectXML, mediaSize, size;
 
     function toBinaryBuffer (string) {
@@ -3577,7 +3565,7 @@ IDE_Morph.prototype.rawSaveProjectToCloud = function (thumbnail, isPublic) {
     SnapAPI.saveMyProject(
         this.projectName,
         toBinaryBuffer(projectXML),
-        isPublic ? 'true' : 'false',
+        null, // the backend keeps the project's public/private state
         mediaXML !== null, // is media present
         this.projectNotes,
         toBinaryBuffer(thumbnail),
@@ -5092,16 +5080,11 @@ IDE_Morph.prototype.logout = function () {
 };
 
 IDE_Morph.prototype.saveProjectToCloud = function (name) {
-    var myself = this,
-        isPublic = location.hash.indexOf(
-                'ProjectName=' + 
-                encodeURIComponent(this.projectName)) > -1;
+    var myself = this;
     if (name) {
         this.showMessage('Saving project\nto the cloud...');
         this.setProjectName(name);
-        this.rawSaveProjectToCloud(
-            this.stage.thumbnail(this.serializer.thumbnailSize).toDataURL(),
-            isPublic);
+        this.rawSaveProjectToCloud(this.stage.thumbnail(this.serializer.thumbnailSize).toDataURL());
     }
 };
 
@@ -5262,11 +5245,11 @@ IDE_Morph.prototype.setCloudURL = function () {
     new DialogBoxMorph(
         null,
         function (url) {
-            SnapCloud.url = url;
+            SnapAPI.url = url;
         }
     ).withKey('cloudURL').prompt(
         'Cloud URL',
-        SnapCloud.url,
+        SnapAPI.url,
         this.world(),
         null,
         {
