@@ -3354,3 +3354,25 @@ Fixes:
 ------
 * Objects, BYOB: highly experimental custom block inheritance, under construction…
 * Blocks: fixed #1650
+
+170207
+------
+* Blocks: catch block label part issues, prevent palette from not showing
+
+170209
+------
+* Blocks: prevent Snap from “hanging” when encountering certain errors in visible stepping mode
+* Threads: fixed #1618 - only mark implicit parameters if no formal ones exist
+
+170209
+------
+* Blocks: fixed #1406
+
+170214
+------
+* Lists: remove experimental methods for object-use
+* Objects, BYOB: disable (comment out) experimental block inheritance for now
+
+170216
+------
+* turn “definition” property of custom block instances into a double-pointer (Variable) structure, in preparation for OOP (method inheritance)
