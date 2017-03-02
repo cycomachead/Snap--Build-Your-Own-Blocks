@@ -3376,3 +3376,12 @@ Fixes:
 170216
 ------
 * turn “definition” property of custom block instances into a double-pointer (Variable) structure, in preparation for OOP (method inheritance)
+
+170227
+------
+* Objects: experiment with new “methods” attribute
+
+170301
+------
+* Objects: experiment with new dynamic method (cache) updating
+* Objects, Blocks, BYOB, Store, Threads, GUI: roll-back double-pointer container cache for methods
