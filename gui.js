@@ -3565,11 +3565,13 @@ IDE_Morph.prototype.rawSaveProjectToCloud = function (thumbnail) {
     SnapAPI.saveMyProject(
         this.projectName,
         toBinaryBuffer(projectXML),
-        null, // the backend keeps the project's public/private state
-        mediaXML !== null, // is media present
         this.projectNotes,
         toBinaryBuffer(thumbnail),
-        toBinaryBuffer(mediaXML))
+        toBinaryBuffer(mediaXML),
+        1, // mediaFormatVersion
+        1, // projectFormatVersion
+        mediaXML !== null, // is media present
+        null) // the backend keeps the project's public/private state
         .then(function () {
             myself.source = 'cloud';
             myself.showMessage('saved.', 2);
@@ -5673,7 +5675,7 @@ ProjectDialogMorph.prototype.buildFilterField = function () {
 
                 if (aProject.projectName) { // cloud
                     name = aProject.projectName;
-                    notes = aProject.projectDescription;
+                    notes = aProject.projectDescription || '';
                 } else { // local or examples
                     name = aProject.name;
                     notes = aProject.notes || '';
@@ -6035,10 +6037,7 @@ ProjectDialogMorph.prototype.saveProject = function () {
 };
 
 ProjectDialogMorph.prototype.saveCloudProject = function () {
-    this.ide.rawSaveProjectToCloud(
-        this.preview.fullImageClassic().toDataURL(),
-        this.listField.selected.public 
-        );
+    this.ide.rawSaveProjectToCloud(this.preview.fullImageClassic().toDataURL());
     this.destroy();
 };
 
