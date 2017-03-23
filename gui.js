@@ -239,11 +239,16 @@ IDE_Morph.prototype.init = function (isAutoFill) {
     this.corralBar = null;
     this.corral = null;
 
+    this.embedPlayButton = null;
+    this.embedOverlay = null;
+    this.isEmbedMode = false;
+
     this.isAutoFill = isAutoFill === undefined ? true : isAutoFill;
     this.isAppMode = false;
     this.isSmallStage = false;
     this.filePicker = null;
     this.hasChangedMedia = false;
+
 
     this.isAnimating = true;
     this.paletteWidth = 200; // initially same as logo width
@@ -357,7 +362,7 @@ IDE_Morph.prototype.openIn = function (world) {
         }
     }
 
-	function applyFlags(dict) {
+    function applyFlags(dict) {
         if (dict.editMode) {
             myself.toggleAppMode(false);
         } else {
@@ -370,10 +375,13 @@ IDE_Morph.prototype.openIn = function (world) {
             myself.controlBar.hide();
             window.onbeforeunload = nop;
         }
+        if (dict.embedMode) {
+            myself.setEmbedMode();
+        }
         if (dict.noExitWarning) {
             window.onbeforeunload = nop;
         }
-	}
+    }
 
     // dynamic notifications from non-source text files
     // has some issues, commented out for now
@@ -1643,7 +1651,24 @@ IDE_Morph.prototype.fixLayout = function (situation) {
 
     if (situation !== 'refreshPalette') {
         // stage
-        if (this.isAppMode) {
+        if (this.isEmbedMode) {
+            this.stage.setScale(Math.floor(Math.min(
+                this.width() / this.stage.dimensions.x,
+                this.height() / this.stage.dimensions.y
+            ) * 10) / 10);
+
+            this.embedPlayButton.size = Math.floor(Math.min(
+                this.width(), this.height())) / 3;
+            this.embedPlayButton.setWidth(this.embedPlayButton.size);
+            this.embedPlayButton.setHeight(this.embedPlayButton.size);
+
+            if (this.embedOverlay) {
+                this.embedOverlay.setExtent(this.extent());
+            }
+
+            this.stage.setCenter(this.center());
+            this.embedPlayButton.setCenter(this.center());
+        } else if (this.isAppMode) {
             this.stage.setScale(Math.floor(Math.min(
                 (this.width() - padding * 2) / this.stage.dimensions.x,
                 (this.height() - this.controlBar.height() * 2 - padding * 2)
@@ -3513,7 +3538,7 @@ IDE_Morph.prototype.rawSaveProjectToCloud = function (thumbnail) {
     var myself = this, mediaXML, projectXML, mediaSize, size;
 
     function toBinaryBuffer (string) {
-        var buffer = new ArrayBuffer(string.length * 2),
+        var buffer = new ArrayBuffer(string.length),
             bufferView = new Uint8Array(buffer);
         
         for (var i = 0; i < string.length; i++) {
@@ -4510,6 +4535,27 @@ IDE_Morph.prototype.toggleInputSliders = function () {
 IDE_Morph.prototype.toggleSliderExecute = function () {
     ArgMorph.prototype.executeOnSliderEdit =
         !ArgMorph.prototype.executeOnSliderEdit;
+};
+
+IDE_Morph.prototype.setEmbedMode = function () {
+    var myself = this;
+    this.embedOverlay = new Morph();
+    this.embedOverlay.color = new Color(128, 128, 128);
+
+    this.embedPlayButton = new SymbolMorph('pointRight');
+    this.embedPlayButton.color = new Color(128, 255, 128);
+
+    this.embedPlayButton.mouseClickLeft = function () {
+        myself.runScripts();
+        myself.embedOverlay.destroy();
+        this.destroy();
+    };
+
+    this.isEmbedMode = true;
+    this.controlBar.hide();
+    this.add(this.embedOverlay);
+    this.add(this.embedPlayButton);
+    this.fixLayout();
 };
 
 IDE_Morph.prototype.toggleAppMode = function (appMode) {
