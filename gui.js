@@ -211,6 +211,8 @@ IDE_Morph.prototype.init = function (isAutoFill) {
     // restore saved user preferences
     this.userLanguage = null; // user language preference for startup
     this.projectsInURLs = false;
+    this.isAutoSaving = true;
+    this.emptyProjectHash = null;
     this.applySavedSettings();
 
     // additional properties:
@@ -259,6 +261,8 @@ IDE_Morph.prototype.init = function (isAutoFill) {
 
     // override inherited properites:
     this.color = this.backgroundColor;
+
+    this.startAutoSaver();
 };
 
 IDE_Morph.prototype.openIn = function (world) {
@@ -280,6 +284,9 @@ IDE_Morph.prototype.openIn = function (world) {
     }
 
     this.buildPanes();
+
+    this.emptyProjectHash = hashString(this.serializer.serialize(this.stage));
+
     world.add(this);
     world.userMenu = this.userMenu;
 
@@ -1996,7 +2003,8 @@ IDE_Morph.prototype.applySavedSettings = function () {
         keyboard = this.getSetting('keyboard'),
         tables = this.getSetting('tables'),
         tableLines = this.getSetting('tableLines'),
-        autoWrapping = this.getSetting('autowrapping');
+        autoWrapping = this.getSetting('autowrapping'),
+        autoSaving = this.getSetting('autosaving');
 
     // design
     if (design === 'flat') {
@@ -2067,6 +2075,11 @@ IDE_Morph.prototype.applySavedSettings = function () {
     // plain prototype labels
     if (plainprototype) {
         BlockLabelPlaceHolderMorph.prototype.plainLabel = true;
+    }
+
+    // autosave
+    if (!autoSaving) {
+        this.isAutoSaving = false;
     }
 };
 
@@ -2707,6 +2720,20 @@ IDE_Morph.prototype.settingsMenu = function () {
         'check to turn on\n visible stepping (slow)',
         false
     );
+    addPreference(
+        'Autosave',
+        function () {
+            myself.isAutoSaving = !myself.isAutoSaving;
+            if (myself.isAutoSaving) {
+                myself.saveSetting('autosaving', true);
+            } else {
+                myself.removeSetting('autosaving');
+            }
+        },
+        myself.isAutoSaving,
+        'uncheck to disable\nproject autosave',
+        'check to enable\nproject autosave'
+    );
     menu.addLine(); // everything below this line is stored in the project
     addPreference(
         'Thread safe scripts',
@@ -2791,6 +2818,9 @@ IDE_Morph.prototype.projectMenu = function () {
     menu.addPair('Open...', 'openProjectsBrowser', '^O');
     menu.addPair('Save', "save", '^S');
     menu.addItem('Save As...', 'saveProjectsBrowser');
+    if (localStorage['-snap-autosave']) {
+        menu.addItem('Recover autosaved project', 'recoverAutoSave');
+    }
     menu.addLine();
     menu.addItem(
         'Import...',
@@ -3423,6 +3453,8 @@ IDE_Morph.prototype.newProject = function () {
     this.createCorral();
     this.selectSprite(this.stage.children[0]);
     this.fixLayout();
+    this.emptyProjectHash = 
+        hashString(this.serializer.serialize(this.stage));
 };
 
 IDE_Morph.prototype.save = function () {
@@ -3475,6 +3507,23 @@ IDE_Morph.prototype.rawSaveProject = function (name) {
     }
 };
 
+IDE_Morph.prototype.startAutoSaver = function () {
+    var myself = this;
+    // we autosave the current project every 10 minutes
+    setInterval(
+        function () {
+            var projectString;
+            if (myself.isAutoSaving) {
+                projectString = myself.serializer.serialize(myself.stage);
+                // prevent an empty project from overwriting an autosaved project
+                if (hashString(projectString) !== myself.emptyProjectHash) {
+                    localStorage['-snap-autosave'] = projectString;
+                }
+            }
+        },
+        600000
+    );
+};
 
 IDE_Morph.prototype.exportProject = function (name, plain, newWindow) {
     // Export project XML, saving a file to disk
@@ -4094,6 +4143,16 @@ IDE_Morph.prototype.openProject = function (name) {
         str = localStorage['-snap-project-' + name];
         this.openProjectString(str);
         this.setURL('#open:' + str);
+    }
+};
+
+IDE_Morph.prototype.recoverAutoSave = function () {
+    if (localStorage['-snap-autosave']) {
+        this.showMessage('Recovering...');
+        this.rawOpenProjectString(localStorage['-snap-autosave']);
+        this.showMessage('Project recovery finished', 2);
+    } else {
+        this.showMessage('Could not find any autosaved project', 3);
     }
 };
 

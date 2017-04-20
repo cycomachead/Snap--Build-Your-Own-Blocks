@@ -1257,6 +1257,15 @@ function sizeOf(object) {
     return size;
 }
 
+function hashString(aString) {
+    var i, hash = 0;
+    for (i = 0; i < aString.length; i += 1) {
+        hash = ((hash << 5) - hash) + aString.charCodeAt(i);
+        hash &= hash;
+    }
+    return hash;
+}
+
 function isString(target) {
     return typeof target === 'string' || target instanceof String;
 }
