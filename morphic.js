@@ -1306,6 +1306,17 @@ function isWordChar(aCharacter) {
     return aCharacter.match(/[A-zÀ-ÿ0-9]/);
 }
 
+function unicodeArray(text) {
+    // JS doesn't handle UTF-16+ strings very well.
+    // where avaiable, we these strings to an array
+    // which probably splits multi-byte characters.
+    // for consistency, all strings are returned as an array.
+    if (Array.from) {
+        return Array.from(text);
+    }
+    return text.split('');
+}
+
 function newCanvas(extentPoint, nonRetina) {
     // answer a new empty instance of Canvas, don't display anywhere
     // nonRetina - optional Boolean "false"
@@ -8710,6 +8721,7 @@ TextMorph.prototype.init = function (
     this.setText(text || (text === '' ? text : 'TextMorph'));
     this.words = [];
     this.lines = [];
+    this.characterLines = [];
     this.lineSlots = [];
     this.fontSize = fontSize || 12;
     this.fontName = fontName || MorphicPreferences.globalFontFamily;
@@ -8756,6 +8768,10 @@ TextMorph.prototype.slice = StringMorph.prototype.slice;
 
 TextMorph.prototype.font = StringMorph.prototype.font;
 
+TextMorph.prototype.charInLine = function (lineY, slotX) {
+    return this.characterLines[lineY][slotX];
+}
+
 TextMorph.prototype.parse = function () {
     var myself = this,
         paragraphs = this.text.split('\n'),
@@ -8769,6 +8785,7 @@ TextMorph.prototype.parse = function () {
     context.font = this.font();
     this.maxLineWidth = 0;
     this.lines = [];
+    this.characterLines = [];
     this.lineSlots = [0];
     this.words = [];
 
@@ -8807,6 +8824,8 @@ TextMorph.prototype.parse = function () {
             slot += word.length + 1;
         }
     });
+
+    this.characterLines = this.lines.map(unicodeArray);
 };
 
 TextMorph.prototype.drawNew = function () {
@@ -8953,8 +8972,7 @@ TextMorph.prototype.slotPosition = function (slot) {
 
     yOffset = colRow.y * (fontHeight(this.fontSize) + shadowHeight);
     for (idx = 0; idx < colRow.x; idx += 1) {
-        // TODO
-        xOffset += context.measureText(this.lines[colRow.y][idx]).width;
+        xOffset += context.measureText(this.charInLine(colRow.y, idx)).width;
     }
     x = this.left() + xOffset;
     y = this.top() + yOffset;
@@ -8979,15 +8997,13 @@ TextMorph.prototype.slotAt = function (aPoint) {
     row = Math.max(row, 1);
 
     while (aPoint.x - this.left() > charX) {
-        // TODO
-        charX += context.measureText(this.lines[row - 1][col]).width;
+        charX += context.measureText(this.charInLine(row - 1, col)).width;
         col += 1;
     }
 
     // see where our click fell with respect to the middle of the char
-    // TODO
     if (aPoint.x - this.left() >
-            charX - context.measureText(this.lines[row - 1][col]).width / 2) {
+            charX - context.measureText(this.charInLine(row - 1, col)).width / 2) {
         return this.lineSlots[Math.max(row - 1, 0)] + col;
     } else {
         return this.lineSlots[Math.max(row - 1, 0)] + col - 1;

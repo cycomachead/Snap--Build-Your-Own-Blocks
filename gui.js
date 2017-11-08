@@ -3475,7 +3475,7 @@ IDE_Morph.prototype.aboutSnap = function () {
     );
     btn2 = dlg.addButton(
         function () {
-            dlg.body.text = aboutTxt;
+            dlg.body.setText(aboutTxt);
             dlg.body.drawNew();
             btn1.show();
             btn2.hide();
@@ -3492,7 +3492,7 @@ IDE_Morph.prototype.aboutSnap = function () {
     btn2.hide();
     licenseBtn = dlg.addButton(
         function () {
-            dlg.body.text = noticeTxt;
+            dlg.body.setText(noticeTxt);
             dlg.body.drawNew();
             btn1.show();
             btn2.show();
@@ -3508,7 +3508,7 @@ IDE_Morph.prototype.aboutSnap = function () {
     );
     btn3 = dlg.addButton(
         function () {
-            dlg.body.text = versions;
+            dlg.body.setText(versions);
             dlg.body.drawNew();
             btn1.show();
             btn2.show();
@@ -3524,7 +3524,7 @@ IDE_Morph.prototype.aboutSnap = function () {
     );
     btn4 = dlg.addButton(
         function () {
-            dlg.body.text = creditsTxt;
+            dlg.body.setText(creditsTxt);
             dlg.body.drawNew();
             btn1.show();
             btn2.show();
@@ -5940,8 +5940,8 @@ ProjectDialogMorph.prototype.setSource = function (source) {
                 if (src) {
                     xml = myself.ide.serializer.parse(src);
 
-                    myself.notesText.text = xml.childNamed('notes').contents
-                        || '';
+                    myself.notesText.setText(xml.childNamed('notes').contents
+                    || '');
                     myself.notesText.drawNew();
                     myself.notesField.contents.adjustBounds();
                     myself.preview.texture =
@@ -5964,8 +5964,8 @@ ProjectDialogMorph.prototype.setSource = function (source) {
             );
 
             xml = myself.ide.serializer.parse(src);
-            myself.notesText.text = xml.childNamed('notes').contents
-                || '';
+            myself.notesText.setText(xml.childNamed('notes').contents
+            || '');
             myself.notesText.drawNew();
             myself.notesField.contents.adjustBounds();
             myself.preview.texture = xml.childNamed('thumbnail').contents
@@ -6053,7 +6053,7 @@ ProjectDialogMorph.prototype.installCloudProjectList = function (pl) {
             myself.nameField.setContents(item.ProjectName || '');
         }
         if (myself.task === 'open') {
-            myself.notesText.text = item.Notes || '';
+            myself.notesText.text = item.Notes || ''; // TODO
             myself.notesText.drawNew();
             myself.notesField.contents.adjustBounds();
             myself.preview.texture = item.Thumbnail || null;
@@ -6094,7 +6094,7 @@ ProjectDialogMorph.prototype.installCloudProjectList = function (pl) {
 };
 
 ProjectDialogMorph.prototype.clearDetails = function () {
-    this.notesText.text = '';
+    this.notesText.text = ''; // TODO
     this.notesText.drawNew();
     this.notesField.contents.adjustBounds();
     this.preview.texture = null;
@@ -6594,7 +6594,7 @@ LibraryImportDialogMorph.prototype.installLibrariesList = function () {
     this.listField.action = function (item) {
         if (isNil(item)) {return; }
 
-        myself.notesText.text = item.description || '';
+        myself.notesText.text = item.description || ''; // TODO
         myself.notesText.drawNew();
         myself.notesField.contents.adjustBounds();
 
