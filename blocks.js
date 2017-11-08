@@ -8175,9 +8175,9 @@ InputSlotMorph.prototype.setContents = function (aStringOrFloat) {
     }
     cnts.text = dta;
     if (isNil(dta)) {
-        cnts.text = '';
+        cnts.setText('');
     } else if (dta.toString) {
-        cnts.text = dta.toString();
+        cnts.setText(dta.toString());
     }
     cnts.drawNew();
 

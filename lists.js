@@ -612,8 +612,8 @@ ListWatcherMorph.prototype.update = function (anyway) {
         }
         this.lastCell = cell;
 
-        if (label.text !== idx.toString()) {
-            label.text = idx.toString();
+        if (label.contents() !== idx.toString()) {
+            label.setText(idx.toString());
             label.drawNew();
         }
 
@@ -694,7 +694,7 @@ ListWatcherMorph.prototype.update = function (anyway) {
 };
 
 ListWatcherMorph.prototype.updateLength = function (notDone) {
-    this.label.text = localize('length: ') + this.list.length();
+    this.label.setText(localize('length: ') + this.list.length());
     if (notDone) {
         this.label.color = new Color(0, 0, 100);
     } else {

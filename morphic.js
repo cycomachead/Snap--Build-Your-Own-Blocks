@@ -1040,7 +1040,7 @@
     canvasses for simple shapes in order to save system resources and
     optimize performance. Examples are costumes and backgrounds in Snap.
     In Morphic you can create new canvas elements using
-    
+
         newCanvas(extentPoint [, nonRetinaFlag])
 
     If retina support is enabled such new canvasses will automatically be
@@ -1081,12 +1081,12 @@
     stepping mechanism.
 
     For an example how to use animations look at how the Morph's methods
-    
+
         glideTo()
         fadeTo()
 
     and
-    
+
         slideBackTo()
 
     are implemented.
@@ -1444,7 +1444,7 @@ function copy(target) {
     canvasses for simple shapes in order to save system resources and
     optimize performance. Examples are costumes and backgrounds in Snap.
     In Morphic you can create new canvas elements using
-    
+
         newCanvas(extentPoint [, nonRetinaFlag])
 
     If retina support is enabled such new canvasses will automatically be
@@ -1478,7 +1478,7 @@ function enableRetinaSupport() {
 
     NOTE: This implementation is not exhaustive; it only implements what is
     needed by the Snap! UI.
-    
+
     [Jens]: like all other retina screen support implementations I've seen
     Bartosz's patch also does not address putImageData() compatibility when
     mixing retina-enabled and non-retina canvasses. If you need to manipulate
@@ -1616,7 +1616,7 @@ function enableRetinaSupport() {
     contextProto.drawImage = function(image) {
         var pixelRatio = getPixelRatio(image),
             sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight;
-        
+
         // Different signatures of drawImage() method have different
         // parameter assignments.
         switch (arguments.length) {
@@ -1808,12 +1808,12 @@ function normalizeCanvas(aCanvas, getCopy) {
     stepping mechanism.
 
     For an example how to use animations look at how the Morph's methods
-    
+
         glideTo()
         fadeTo()
 
     and
-    
+
         slideBackTo()
 
     are implemented.
@@ -4004,7 +4004,7 @@ Morph.prototype.prompt = function (
         if (isRounded) {
             slider.action = function (num) {
                 entryField.changed();
-                entryField.text.text = Math.round(num).toString();
+                entryField.text.setText(Math.round(num).toString());
                 entryField.text.drawNew();
                 entryField.text.changed();
                 entryField.text.edit();
@@ -4012,7 +4012,7 @@ Morph.prototype.prompt = function (
         } else {
             slider.action = function (num) {
                 entryField.changed();
-                entryField.text.text = num.toString();
+                entryField.text.setText(num.toString());
                 entryField.text.drawNew();
                 entryField.text.changed();
             };
@@ -5469,7 +5469,7 @@ CursorMorph.prototype.gotoSlot = function (newSlot) {
 */
 
 CursorMorph.prototype.gotoSlot = function (slot) {
-    var length = this.target.text.length,
+    var length = this.target.length,
         pos = this.target.slotPosition(slot),
         right,
         left;
@@ -5579,7 +5579,7 @@ CursorMorph.prototype.cancel = function () {
 };
 
 CursorMorph.prototype.undo = function () {
-    this.target.text = this.originalContents;
+    this.target.setText(this.originalContents);
     this.target.changed();
     this.target.drawNew();
     this.target.changed();
@@ -5602,11 +5602,10 @@ CursorMorph.prototype.insert = function (aChar, shiftKey) {
             this.gotoSlot(this.target.selectionStartSlot());
             this.target.deleteSelection();
         }
-        text = this.target.text;
-        text = text.slice(0, this.slot) +
+        text = this.target.slice(0, this.slot) +
             aChar +
-            text.slice(this.slot);
-        this.target.text = text;
+            this.target.slice(this.slot);
+        this.target.setText(text);
         this.target.drawNew();
         this.target.changed();
         this.goRight(false, aChar.length);
@@ -5660,29 +5659,27 @@ CursorMorph.prototype.cmd = function (aChar, shiftKey) {
 };
 
 CursorMorph.prototype.deleteRight = function () {
-    var text;
     if (this.target.selection() !== '') {
         this.gotoSlot(this.target.selectionStartSlot());
         this.target.deleteSelection();
     } else {
-        text = this.target.text;
         this.target.changed();
-        text = text.slice(0, this.slot) + text.slice(this.slot + 1);
-        this.target.text = text;
+        this.target.setText(
+            this.target.slice(0, this.slot) + this.target.slice(this.slot + 1)
+        );
         this.target.drawNew();
     }
 };
 
 CursorMorph.prototype.deleteLeft = function () {
-    var text;
     if (this.target.selection()) {
         this.gotoSlot(this.target.selectionStartSlot());
         return this.target.deleteSelection();
     }
-    text = this.target.text;
     this.target.changed();
-    this.target.text = text.substring(0, this.slot - 1) +
-        text.substr(this.slot);
+    this.target.setText(
+        this.target.slice(0, this.slot - 1) + this.target.slice(this.slot)
+    );
     this.target.drawNew();
     this.goLeft();
 };
@@ -7487,8 +7484,8 @@ InspectorMorph.prototype.removeProperty = function () {
 InspectorMorph.prototype.step = function () {
     this.updateCurrentSelection();
     var lbl = this.target.toString();
-    if (this.label.text === lbl) {return; }
-    this.label.text = lbl;
+    if (this.label.contents() === lbl) {return; }
+    this.label.setText(lbl);
     this.label.drawNew();
     this.fixLayout();
 };
@@ -8012,7 +8009,8 @@ StringMorph.prototype.init = function (
     fontName
 ) {
     // additional properties:
-    this.text = text || ((text === '') ? '' : 'StringMorph');
+    this.setText(text);
+
     this.fontSize = fontSize || 12;
     this.fontName = fontName || MorphicPreferences.globalFontFamily;
     this.fontStyle = fontStyle || 'sans-serif';
@@ -8043,12 +8041,38 @@ StringMorph.prototype.init = function (
     this.drawNew();
 };
 
+// Handle UTF-16+ support (requires browser support)
+// Whenever iterating over, or accessing individual letters
+// use this.characters over the raw this.text
+StringMorph.prototype.setText = function (text) {
+    this.text = text || ((text === '') ? '' : 'StringMorph');
+
+    if (Array.from) {
+        this.characters = Array.from(this.text);
+    } else {
+        this.characters = this.text;
+    }
+    this.length = this.characters.length;
+}
+
+StringMorph.prototype.contents = function () {
+    if (this.isPassword) {
+        return this.password('*', this.length);
+    }
+
+    return this.text;
+}
+
+StringMorph.prototype.charAt = function (i) {
+    return this.isPassword ? '*' : this.characters[i];
+}
+
 StringMorph.prototype.toString = function () {
     // e.g. 'a StringMorph("Hello World")'
     return 'a ' +
         (this.constructor.name ||
             this.constructor.toString().split(' ')[1].split('(')[0]) +
-        '("' + this.text.slice(0, 30) + '...")';
+        '("' + this.slice(0, 30) + '...")';
 };
 
 StringMorph.prototype.password = function (letter, length) {
@@ -8078,9 +8102,7 @@ StringMorph.prototype.font = function () {
 StringMorph.prototype.drawNew = function () {
     var context, width, start, stop, i, p, c, x, y,
         shadowOffset = this.shadowOffset || new Point(),
-        txt = this.isPassword ?
-                this.password('*', this.text.length) : this.text;
-
+        txt = this.contents();
     // initialize my surface property
     this.image = newCanvas();
     context = this.image.getContext('2d');
@@ -8129,7 +8151,7 @@ StringMorph.prototype.drawNew = function () {
     stop = Math.max(this.startMark, this.endMark);
     for (i = start; i < stop; i += 1) {
         p = this.slotPosition(i).subtract(this.position());
-        c = txt.charAt(i);
+        c = this.charAt(i);
         context.fillStyle = this.markedBackgoundColor.toString();
         context.fillRect(p.x, p.y, context.measureText(c).width + 1 + x,
             fontHeight(this.fontSize) + y);
@@ -8149,7 +8171,7 @@ StringMorph.prototype.renderWithBlanks = function (context, startX, y) {
     var space = context.measureText(' ').width,
         blank = newCanvas(new Point(space, this.height())),
         ctx = blank.getContext('2d'),
-        words = this.text.split(' '),
+        words = this.contents().split(' '),
         x = startX || 0,
         isFirst = true;
 
@@ -8187,9 +8209,7 @@ StringMorph.prototype.renderWithBlanks = function (context, startX, y) {
 StringMorph.prototype.slotPosition = function (slot) {
     // answer the position point of the given index ("slot")
     // where the cursor should be placed
-    var txt = this.isPassword ?
-                this.password('*', this.text.length) : this.text,
-        dest = Math.min(Math.max(slot, 0), txt.length),
+    var dest = Math.min(Math.max(slot, 0), this.length),
         context = this.image.getContext('2d'),
         xOffset,
         x,
@@ -8198,7 +8218,7 @@ StringMorph.prototype.slotPosition = function (slot) {
 
     xOffset = 0;
     for (idx = 0; idx < dest; idx += 1) {
-        xOffset += context.measureText(txt[idx]).width;
+        xOffset += context.measureText(this.charAt(idx)).width;
     }
     this.pos = dest;
     x = this.left() + xOffset;
@@ -8211,18 +8231,17 @@ StringMorph.prototype.slotAt = function (aPoint) {
     // in account how far from the middle of the character it is,
     // so the cursor can be moved accordingly
 
-    var txt = this.isPassword ?
-                this.password('*', this.text.length) : this.text,
+    var txt = this.contents(),
         idx = 0,
         charX = 0,
         context = this.image.getContext('2d');
 
     while (aPoint.x - this.left() > charX) {
-        charX += context.measureText(txt[idx]).width;
+        charX += context.measureText(this.charAt(idx)).width;
         idx += 1;
-        if (idx === txt.length) {
+        if (idx === this.length) {
             if ((context.measureText(txt).width -
-                    (context.measureText(txt[idx - 1]).width / 2)) <
+                    (context.measureText(this.charAt(idx - 1)).width / 2)) <
                     (aPoint.x - this.left())) {
                 return idx;
             }
@@ -8231,7 +8250,7 @@ StringMorph.prototype.slotAt = function (aPoint) {
 
     // see where our click fell with respect to the middle of the char
     if (aPoint.x - this.left() >
-            charX - context.measureText(txt[idx - 1]).width / 2) {
+            charX - context.measureText(this.charAt(idx - 1)).width / 2) {
         return idx;
     } else {
         return idx - 1;
@@ -8255,24 +8274,24 @@ StringMorph.prototype.startOfLine = function () {
 
 StringMorph.prototype.endOfLine = function () {
     // answer the slot (index) indicating the EOL for the given slot
-    return this.text.length;
+    return this.length;
 };
 
 StringMorph.prototype.previousWordFrom = function (aSlot) {
     // answer the slot (index) slots indicating the position of the
     // previous word to the left of aSlot
     var index = aSlot - 1;
-    
+
     // while the current character is non-word one, we skip it, so that
     // if we are in the middle of a non-alphanumeric sequence, we'll get
     // right to the beginning of the previous word
-    while (index > 0 && !isWordChar(this.text[index])) {
+    while (index > 0 && !isWordChar(this.charAt(index))) {
         index -= 1;
     }
 
     // while the current character is a word one, we skip it until we
     // find the beginning of the current word
-    while (index > 0 && isWordChar(this.text[index - 1])) {
+    while (index > 0 && isWordChar(this.charAt(index - 1))) {
         index -= 1;
     }
 
@@ -8281,12 +8300,12 @@ StringMorph.prototype.previousWordFrom = function (aSlot) {
 
 StringMorph.prototype.nextWordFrom = function (aSlot) {
     var index = aSlot;
-    
-    while (index < this.endOfLine() && !isWordChar(this.text[index])) {
+
+    while (index < this.endOfLine() && !isWordChar(this.charAt(index))) {
         index += 1;
     }
 
-    while (index < this.endOfLine() && isWordChar(this.text[index])) {
+    while (index < this.endOfLine() && isWordChar(this.charAt(index))) {
         index += 1;
     }
 
@@ -8420,9 +8439,9 @@ StringMorph.prototype.setFontSize = function (size) {
     this.changed();
 };
 
-StringMorph.prototype.setText = function (size) {
+StringMorph.prototype.setDemoText = function (size) {
     // for context menu demo purposes
-    this.text = Math.round(size).toString();
+    this.setText(Math.round(size).toString());
     this.changed();
     this.drawNew();
     this.changed();
@@ -8435,7 +8454,7 @@ StringMorph.prototype.numericalSetters = function () {
         'setTop',
         'setAlphaScaled',
         'setFontSize',
-        'setText'
+        'setDemoText'
     ];
 };
 
@@ -8449,7 +8468,7 @@ StringMorph.prototype.selection = function () {
     var start, stop;
     start = Math.min(this.startMark, this.endMark);
     stop = Math.max(this.startMark, this.endMark);
-    return this.text.slice(start, stop);
+    return this.characters.slice(start, stop);
 };
 
 StringMorph.prototype.selectionStartSlot = function () {
@@ -8469,12 +8488,19 @@ StringMorph.prototype.clearSelection = function () {
     this.changed();
 };
 
+StringMorph.prototype.slice = function(start, stop) {
+    var part = this.characters.slice(start, stop);
+    if (part.join) { // Convert a character array back into a string.
+        return part.join('');
+    }
+    return part;
+}
+
 StringMorph.prototype.deleteSelection = function () {
-    var start, stop, text;
-    text = this.text;
+    var start, stop;
     start = Math.min(this.startMark, this.endMark);
     stop = Math.max(this.startMark, this.endMark);
-    this.text = text.slice(0, start) + text.slice(stop);
+    this.setText(this.slice(0, start) + this.slice(stop));
     this.changed();
     this.clearSelection();
 };
@@ -8485,9 +8511,9 @@ StringMorph.prototype.selectAll = function () {
         this.startMark = 0;
         cursor = this.root().cursor;
         if (cursor) {
-            cursor.gotoSlot(this.text.length);
+            cursor.gotoSlot(this.length);
         }
-        this.endMark = this.text.length;
+        this.endMark = this.length;
         this.drawNew();
         this.changed();
     }
@@ -8544,13 +8570,13 @@ StringMorph.prototype.mouseDoubleClick = function (pos) {
     if (this.isEditable) {
         this.edit();
 
-        if (slot === this.text.length) {
+        if (slot === this.length) {
             slot -= 1;
         }
 
-        if (this.text[slot] && isWordChar(this.text[slot])) {
+        if (this.charAt(slot) && isWordChar(this.charAt(slot))) {
             this.selectWordAt(slot);
-        } else if (this.text[slot]) {
+        } else if (this.charAt(slot)) {
             this.selectBetweenWordsAt(slot);
         } else {
             // special case for when we click right after the
@@ -8565,7 +8591,7 @@ StringMorph.prototype.mouseDoubleClick = function (pos) {
 StringMorph.prototype.selectWordAt = function (slot) {
     var cursor = this.root().cursor;
 
-    if (slot === 0 || isWordChar(this.text[slot - 1])) {
+    if (slot === 0 || isWordChar(this.charAt(slot - 1))) {
         cursor.gotoSlot(this.previousWordFrom(slot));
         this.startMark = cursor.slot;
         this.endMark = this.nextWordFrom(cursor.slot);
@@ -8586,8 +8612,8 @@ StringMorph.prototype.selectBetweenWordsAt = function (slot) {
     this.startMark = cursor.slot;
     this.endMark = cursor.slot;
 
-    while (this.endMark < this.text.length
-            && !isWordChar(this.text[this.endMark])) {
+    while (this.endMark < this.length
+            && !isWordChar(this.charAt(this.endMark))) {
         this.endMark += 1;
     }
 
@@ -8681,7 +8707,7 @@ TextMorph.prototype.init = function (
     shadowColor
 ) {
     // additional properties:
-    this.text = text || (text === '' ? text : 'TextMorph');
+    this.setText(text || (text === '' ? text : 'TextMorph'));
     this.words = [];
     this.lines = [];
     this.lineSlots = [];
@@ -8720,8 +8746,13 @@ TextMorph.prototype.init = function (
 
 TextMorph.prototype.toString = function () {
     // e.g. 'a TextMorph("Hello World")'
-    return 'a TextMorph' + '("' + this.text.slice(0, 30) + '...")';
+    return 'a TextMorph' + '("' + this.slice(0, 30) + '...")';
 };
+
+TextMorph.prototype.setText = StringMorph.prototype.setText;
+TextMorph.prototype.contents = StringMorph.prototype.contents;
+TextMorph.prototype.charAt = StringMorph.prototype.charAt;
+TextMorph.prototype.slice = StringMorph.prototype.slice;
 
 TextMorph.prototype.font = StringMorph.prototype.font;
 
@@ -8862,7 +8893,7 @@ TextMorph.prototype.drawNew = function () {
     stop = Math.max(this.startMark, this.endMark);
     for (i = start; i < stop; i += 1) {
         p = this.slotPosition(i).subtract(this.position());
-        c = this.text.charAt(i);
+        c = this.charAt(i);
         context.fillStyle = this.markedBackgoundColor.toString();
         context.fillRect(p.x, p.y, context.measureText(c).width + 1,
             fontHeight(this.fontSize));
@@ -8922,6 +8953,7 @@ TextMorph.prototype.slotPosition = function (slot) {
 
     yOffset = colRow.y * (fontHeight(this.fontSize) + shadowHeight);
     for (idx = 0; idx < colRow.x; idx += 1) {
+        // TODO
         xOffset += context.measureText(this.lines[colRow.y][idx]).width;
     }
     x = this.left() + xOffset;
@@ -8947,11 +8979,13 @@ TextMorph.prototype.slotAt = function (aPoint) {
     row = Math.max(row, 1);
 
     while (aPoint.x - this.left() > charX) {
+        // TODO
         charX += context.measureText(this.lines[row - 1][col]).width;
         col += 1;
     }
 
     // see where our click fell with respect to the middle of the char
+    // TODO
     if (aPoint.x - this.left() >
             charX - context.measureText(this.lines[row - 1][col]).width / 2) {
         return this.lineSlots[Math.max(row - 1, 0)] + col;
@@ -9120,7 +9154,7 @@ TextMorph.prototype.setSerif = StringMorph.prototype.setSerif;
 
 TextMorph.prototype.setSansSerif = StringMorph.prototype.setSansSerif;
 
-TextMorph.prototype.setText = StringMorph.prototype.setText;
+TextMorph.prototype.setDemoText = StringMorph.prototype.setDemoText;
 
 TextMorph.prototype.setFontSize = StringMorph.prototype.setFontSize;
 
