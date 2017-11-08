@@ -8056,14 +8056,8 @@ StringMorph.prototype.init = function (
 // Whenever iterating over, or accessing individual letters
 // use this.characters over the raw this.text
 StringMorph.prototype.setText = function (text) {
-    this.text = text || ((text === '') ? '' : 'StringMorph');
-
-    if (Array.from) {
-        this.characters = Array.from(this.text);
-    } else {
-        this.characters = this.text;
-    }
-    this.length = this.characters.length;
+    this.text = unicodeArray(text || ((text === '') ? '' : 'StringMorph'));
+    this.length = this.text.length;
 }
 
 StringMorph.prototype.contents = function () {
@@ -8071,11 +8065,11 @@ StringMorph.prototype.contents = function () {
         return this.password('*', this.length);
     }
 
-    return this.text;
+    return this.text.join('');
 }
 
 StringMorph.prototype.charAt = function (i) {
-    return this.isPassword ? '*' : this.characters[i];
+    return this.isPassword ? '*' : this.text[i];
 }
 
 StringMorph.prototype.toString = function () {
@@ -8114,6 +8108,7 @@ StringMorph.prototype.drawNew = function () {
     var context, width, start, stop, i, p, c, x, y,
         shadowOffset = this.shadowOffset || new Point(),
         txt = this.contents();
+
     // initialize my surface property
     this.image = newCanvas();
     context = this.image.getContext('2d');
@@ -8479,7 +8474,7 @@ StringMorph.prototype.selection = function () {
     var start, stop;
     start = Math.min(this.startMark, this.endMark);
     stop = Math.max(this.startMark, this.endMark);
-    return this.characters.slice(start, stop);
+    return this.slice(start, stop);
 };
 
 StringMorph.prototype.selectionStartSlot = function () {
@@ -8500,7 +8495,7 @@ StringMorph.prototype.clearSelection = function () {
 };
 
 StringMorph.prototype.slice = function(start, stop) {
-    var part = this.characters.slice(start, stop);
+    var part = this.text.slice(start, stop);
     if (part.join) { // Convert a character array back into a string.
         return part.join('');
     }
@@ -8774,7 +8769,7 @@ TextMorph.prototype.charInLine = function (lineY, slotX) {
 
 TextMorph.prototype.parse = function () {
     var myself = this,
-        paragraphs = this.text.split('\n'),
+        paragraphs = this.contents().split('\n'),
         canvas = newCanvas(),
         context = canvas.getContext('2d'),
         oldline = '',
