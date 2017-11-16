@@ -8173,7 +8173,7 @@ InputSlotMorph.prototype.setContents = function (aStringOrFloat) {
             return this.setContents(this.choices[dta]);
         }
     }
-    cnts.text = dta;
+    cnts.setText(dta);
     if (isNil(dta)) {
         cnts.setText('');
     } else if (dta.toString) {

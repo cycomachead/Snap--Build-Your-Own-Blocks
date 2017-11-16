@@ -6053,7 +6053,7 @@ ProjectDialogMorph.prototype.installCloudProjectList = function (pl) {
             myself.nameField.setContents(item.ProjectName || '');
         }
         if (myself.task === 'open') {
-            myself.notesText.text = item.Notes || ''; // TODO
+            myself.notesText.setText(item.Notes || '');
             myself.notesText.drawNew();
             myself.notesField.contents.adjustBounds();
             myself.preview.texture = item.Thumbnail || null;
@@ -6094,7 +6094,7 @@ ProjectDialogMorph.prototype.installCloudProjectList = function (pl) {
 };
 
 ProjectDialogMorph.prototype.clearDetails = function () {
-    this.notesText.text = ''; // TODO
+    this.notesText.setText('');
     this.notesText.drawNew();
     this.notesField.contents.adjustBounds();
     this.preview.texture = null;
@@ -6594,7 +6594,7 @@ LibraryImportDialogMorph.prototype.installLibrariesList = function () {
     this.listField.action = function (item) {
         if (isNil(item)) {return; }
 
-        myself.notesText.text = item.description || ''; // TODO
+        myself.notesText.setText(item.description || '');
         myself.notesText.drawNew();
         myself.notesField.contents.adjustBounds();
 

@@ -2640,7 +2640,7 @@ BlockLabelFragmentMorph.prototype.userMenu = function () {
                 var tuple = myself.text.split('-');
                 myself.changed();
                 tuple[0] = '$' + string;
-                myself.text = tuple.join('-');
+                myself.setText(tuple.join('-'));
                 myself.fragment.labelString = myself.text;
                 myself.parent.parent.changed();
                 myself.drawNew();
@@ -2703,7 +2703,7 @@ BlockLabelPlaceHolderMorph.prototype.drawNew = function () {
 
     // set my text contents depending on the "plainLabel" flag
     if (this.plainLabel) {
-        this.text = this.isHighlighted ? ' + ' : '';
+        this.setText(this.isHighlighted ? ' + ' : '');
     }
 
     // initialize my surface property
@@ -2713,7 +2713,7 @@ BlockLabelPlaceHolderMorph.prototype.drawNew = function () {
 
     // set my extent
     width = Math.max(
-        context.measureText(this.text).width
+        context.measureText(this.contents()).width
             + Math.abs(this.shadowOffset.x),
         1
     );
