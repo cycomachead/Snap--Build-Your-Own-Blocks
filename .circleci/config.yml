@@ -1,15 +1,6 @@
 # Deploy Snap! to Berkeley & mirrors
 version: 2
 jobs:
-  build:
-    docker:
-      - image: circleci/node:7.10
-    working_directory: ~/snap
-    steps:
-      - checkout
-      - run:
-          name: Install sshpass Dependency (sync to Berkeley)
-          command: sudo apt-get update; sudo apt-get install sshpass
   deploy:
     machine:
       enabled: true
@@ -27,7 +18,9 @@ jobs:
           command: |
             cd ~/snap
             git remote add cs10 https://github.com/cs10/snap
-            git push -f cs10 master:${CIRCLE_TAG}
+            git fetch origin --tags
+            latest=$(git describe --tags `git rev-list --tags --max-count=1`)
+            git push -f cs10 ${lates}:master
       - run:
           name: Deploy to snap.berkeley.edu
           command: |
@@ -54,26 +47,14 @@ workflows:
   version: 2
   build-and-deploy:
     jobs:
-      # Build needs to happen for everything.
-      - build:
-          filters:
-            branches:
-              only: /.*/
-            tags:
-              # Deploy tags that are version strings.
-              only: /^\d\.\d/
       - deploy:
-          requires:
-            - build
           filters:
             branches:
-              only: /.*/
+              ignore: /.*/
             tags:
               # Deploy tags that are version strings.
               only: /^\d\.\d/
       - deploy-dev:
-          requires:
-            - build
           filters:
             branches:
               only: master
