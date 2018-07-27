@@ -17,6 +17,10 @@ jobs:
       - REPO_PATH: '~/snap/*'
       - ACCOUNT: 'michael@abbenay.cs.berkeley.edu'
     steps:
+      - checkout
+      - run:
+          name: Install sshpass Dependency (sync to Berkeley)
+          command: sudo apt-get update; sudo apt-get install sshpass
       - run:
           name: Deploy to cs10.org
           command: |
@@ -35,6 +39,10 @@ jobs:
       - REPO_PATH: '~/snap/*'
       - ACCOUNT: 'michael@abbenay.cs.berkeley.edu'
     steps:
+      - checkout
+      - run:
+          name: Install sshpass Dependency (sync to Berkeley)
+          command: sudo apt-get update; sudo apt-get install sshpass
       - run:
           name: Deploy Over SSH (to snapsource/dev)
           command: |
@@ -49,6 +57,9 @@ workflows:
           requires:
             - build
           filters:
+            branches:
+              # Deploy tags that are version strings.
+              only: /^\d\.\d/
             tags:
               # Deploy tags that are version strings.
               only: /^\d\.\d/
