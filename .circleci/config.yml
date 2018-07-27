@@ -13,7 +13,8 @@ jobs:
   deploy:
     machine:
       enabled: true
-    environemnt:
+    working_directory: ~/snap
+    environment:
       - REPO_PATH: '~/snap/*'
       - ACCOUNT: 'michael@abbenay.cs.berkeley.edu'
     steps:
@@ -35,7 +36,8 @@ jobs:
   deploy-dev:
     machine:
       enabled: true
-    environemnt:
+    working_directory: ~/snap
+    environment:
       - REPO_PATH: '~/snap/*'
       - ACCOUNT: 'michael@abbenay.cs.berkeley.edu'
     steps:
