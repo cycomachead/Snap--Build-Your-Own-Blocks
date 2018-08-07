@@ -577,7 +577,7 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode) {
             watcher.setSliderMin(model.attributes.min || '1', true);
             watcher.setSliderMax(model.attributes.max || '100', true);
         }
-        watcher.setPosition(
+        watcher.silentSetPosition(
             project.stage.topLeft().add(new Point(
                 +model.attributes.x || 0,
                 +model.attributes.y || 0
@@ -1002,7 +1002,7 @@ SnapSerializer.prototype.loadScripts = function (object, scripts, model) {
             if (!element) {
                 return;
             }
-            element.setPosition(new Point(
+            element.silentSetPosition(new Point(
                 (+child.attributes.x || 0) * scale,
                 (+child.attributes.y || 0) * scale
             ).add(scripts.topLeft()));
@@ -1016,7 +1016,7 @@ SnapSerializer.prototype.loadScripts = function (object, scripts, model) {
             if (!element) {
                 return;
             }
-            element.setPosition(new Point(
+            element.silentSetPosition(new Point(
                 (+child.attributes.x || 0) * scale,
                 (+child.attributes.y || 0) * scale
             ).add(scripts.topLeft()));
@@ -1037,7 +1037,7 @@ SnapSerializer.prototype.loadScriptsArray = function (model, object) {
             if (!element) {
                 return;
             }
-            element.setPosition(new Point(
+            element.silentSetPosition(new Point(
                 (+child.attributes.x || 0) * scale,
                 (+child.attributes.y || 0) * scale
             ));
@@ -1048,7 +1048,7 @@ SnapSerializer.prototype.loadScriptsArray = function (model, object) {
             if (!element) {
                 return;
             }
-            element.setPosition(new Point(
+            element.silentSetPosition(new Point(
                 (+child.attributes.x || 0) * scale,
                 (+child.attributes.y || 0) * scale
             ));
