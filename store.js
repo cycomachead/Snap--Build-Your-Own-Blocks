@@ -683,7 +683,7 @@ SnapSerializer.prototype.loadSprites = function (xmlString, ide) {
         sprite.isDraggable = model.attributes.draggable !== 'false';
         sprite.isVisible = model.attributes.hidden !== 'true';
         sprite.heading = parseFloat(model.attributes.heading) || 0;
-        sprite.silentGoToXY(+model.attributes.x || 0, +model.attributes.y || 0);
+        sprite.silentGotoXY(+model.attributes.x || 0, +model.attributes.y || 0);
         sprite.drawNew();
         myself.loadObject(sprite, model);
     });
@@ -1360,7 +1360,7 @@ SnapSerializer.prototype.loadValue = function (model, object) {
         v.isVisible = model.attributes.hidden !== 'true';
         v.heading = parseFloat(model.attributes.heading) || 0;
         v.drawNew();
-        v.goToXY(+model.attributes.x || 0, +model.attributes.y || 0);
+        v.gotoXY(+model.attributes.x || 0, +model.attributes.y || 0);
         myself.loadObject(v, model);
         return v;
     case 'context':
