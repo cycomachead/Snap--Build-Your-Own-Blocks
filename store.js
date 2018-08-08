@@ -683,8 +683,8 @@ SnapSerializer.prototype.loadSprites = function (xmlString, ide) {
         sprite.isDraggable = model.attributes.draggable !== 'false';
         sprite.isVisible = model.attributes.hidden !== 'true';
         sprite.heading = parseFloat(model.attributes.heading) || 0;
-        sprite.drawNew();
         sprite.silentGoToXY(+model.attributes.x || 0, +model.attributes.y || 0);
+        sprite.drawNew();
         myself.loadObject(sprite, model);
     });
 
@@ -1209,13 +1209,13 @@ SnapSerializer.prototype.loadInput = function (model, input, block, object) {
         inp = this.loadScript(model, object);
         if (inp) {
             input.add(inp);
-            input.fixLayout();
+            input.fixLayout(true);
         }
     } else if (model.tag === 'autolambda' && model.children[0]) {
         inp = this.loadBlock(model.children[0], true, object);
         if (inp) {
             input.silentReplaceInput(input.children[0], inp);
-            input.fixLayout();
+            input.fixLayout(true);
         }
     } else if (model.tag === 'list') {
         while (input.inputs().length > 0) {
@@ -1230,7 +1230,7 @@ SnapSerializer.prototype.loadInput = function (model, input, block, object) {
                 object
             );
         });
-        input.fixLayout();
+        input.fixLayout(true);
     } else if (model.tag === 'block' || model.tag === 'custom-block') {
         block.silentReplaceInput(input, this.loadBlock(model, true, object));
     } else if (model.tag === 'color') {
@@ -1510,10 +1510,10 @@ SnapSerializer.prototype.loadValue = function (model, object) {
         record();
         return v;
     case 'wish':
-    	def = new CustomBlockDefinition(model.attributes.s);
-     	def.type = model.attributes.type;
-      	def.category = model.attributes.category;
-       	def.storedSemanticSpec = model.attributes.s;
+        def = new CustomBlockDefinition(model.attributes.s);
+        def.type = model.attributes.type;
+        def.category = model.attributes.category;
+        def.storedSemanticSpec = model.attributes.s;
         def.updateTranslations(model.contents);
         return def.blockInstance(true); // include translations
     }
