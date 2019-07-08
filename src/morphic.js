@@ -1042,7 +1042,7 @@
     canvasses for simple shapes in order to save system resources and
     optimize performance. Examples are costumes and backgrounds in Snap.
     In Morphic you can create new canvas elements using
-    
+
         newCanvas(extentPoint [, nonRetinaFlag])
 
     If retina support is enabled such new canvasses will automatically be
@@ -1083,12 +1083,12 @@
     stepping mechanism.
 
     For an example how to use animations look at how the Morph's methods
-    
+
         glideTo()
         fadeTo()
 
     and
-    
+
         slideBackTo()
 
     are implemented.
@@ -1312,7 +1312,7 @@ function newCanvas(extentPoint, nonRetina) {
     // nonRetina - optional Boolean "false"
     // by default retina support is automatic
     var canvas, ext;
-    ext = extentPoint || {x: 0, y: 0};
+    ext = extentPoint || { x: 0, y: 0 };
     canvas = document.createElement('canvas');
     canvas.width = ext.x;
     canvas.height = ext.y;
@@ -1378,15 +1378,15 @@ function getDocumentPositionOf(aDOMelement) {
     // answer the absolute coordinates of a DOM element in the document
     var pos, offsetParent;
     if (aDOMelement === null) {
-        return {x: 0, y: 0};
+        return { x: 0, y: 0 };
     }
-    pos = {x: aDOMelement.offsetLeft, y: aDOMelement.offsetTop};
+    pos = { x: aDOMelement.offsetLeft, y: aDOMelement.offsetTop };
     offsetParent = aDOMelement.offsetParent;
     while (offsetParent !== null) {
         pos.x += offsetParent.offsetLeft;
         pos.y += offsetParent.offsetTop;
         if (offsetParent !== document.body &&
-                offsetParent !== document.documentElement) {
+            offsetParent !== document.documentElement) {
             pos.x -= offsetParent.scrollLeft;
             pos.y -= offsetParent.scrollTop;
         }
@@ -1407,7 +1407,7 @@ function copy(target) {
         return new target.constructor(value);
     }
     if (target instanceof target.constructor &&
-            target.constructor !== Object) {
+        target.constructor !== Object) {
         c = Object.create(target.constructor.prototype);
         keys = Object.keys(target);
         for (l = keys.length, i = 0; i < l; i += 1) {
@@ -1445,7 +1445,7 @@ function copy(target) {
     canvasses for simple shapes in order to save system resources and
     optimize performance. Examples are costumes and backgrounds in Snap.
     In Morphic you can create new canvas elements using
-    
+
         newCanvas(extentPoint [, nonRetinaFlag])
 
     If retina support is enabled such new canvasses will automatically be
@@ -1468,24 +1468,24 @@ function copy(target) {
 */
 
 function enableRetinaSupport() {
-/*
-    === contributed by Bartosz Leper ===
-
-    This installs a series of utilities that allow using Canvas the same way
-    on retina and non-retina displays. If the display is a retina one, the
-    underlying dimensions of the Canvas elements are doubled, but this will
-    be transparent to the code that uses Canvas. All dimensions read or
-    written to the Canvas element will be scaled appropriately.
-
-    NOTE: This implementation is not exhaustive; it only implements what is
-    needed by the Snap! UI.
+    /*
+        === contributed by Bartosz Leper ===
     
-    [Jens]: like all other retina screen support implementations I've seen
-    Bartosz's patch also does not address putImageData() compatibility when
-    mixing retina-enabled and non-retina canvasses. If you need to manipulate
-    pixels in such mixed canvasses, make sure to "downgrade" them all using
-    normalizeCanvas() below.
-*/
+        This installs a series of utilities that allow using Canvas the same way
+        on retina and non-retina displays. If the display is a retina one, the
+        underlying dimensions of the Canvas elements are doubled, but this will
+        be transparent to the code that uses Canvas. All dimensions read or
+        written to the Canvas element will be scaled appropriately.
+    
+        NOTE: This implementation is not exhaustive; it only implements what is
+        needed by the Snap! UI.
+    
+        [Jens]: like all other retina screen support implementations I've seen
+        Bartosz's patch also does not address putImageData() compatibility when
+        mixing retina-enabled and non-retina canvasses. If you need to manipulate
+        pixels in such mixed canvasses, make sure to "downgrade" them all using
+        normalizeCanvas() below.
+    */
 
     // Get the window's pixel ratio for canvas elements.
     // See: http://www.html5rocks.com/en/tutorials/canvas/hidpi/
@@ -1496,26 +1496,26 @@ function enableRetinaSupport() {
             ctx.oBackingStorePixelRatio ||
             ctx.backingStorePixelRatio || 1,
 
-    // Unfortunately, it's really hard to make this work well when changing
-    // zoom level, so let's leave it like this right now, and stick to
-    // whatever the ratio was in the beginning.
+        // Unfortunately, it's really hard to make this work well when changing
+        // zoom level, so let's leave it like this right now, and stick to
+        // whatever the ratio was in the beginning.
 
         // originalDevicePixelRatio = window.devicePixelRatio,
 
-    // [Jens]: As of summer 2016 non-integer devicePixelRatios lead to
-    // artifacts when blitting images onto canvas elements in all browsers
-    // except Chrome, especially Firefox, Edge, IE (Safari doesn't even
-    // support retina mode as implemented here).
-    // therefore - to ensure crisp fonts - use the ceiling of whatever
-    // the devicePixelRatio is. This needs more memory, but looks nicer.
+        // [Jens]: As of summer 2016 non-integer devicePixelRatios lead to
+        // artifacts when blitting images onto canvas elements in all browsers
+        // except Chrome, especially Firefox, Edge, IE (Safari doesn't even
+        // support retina mode as implemented here).
+        // therefore - to ensure crisp fonts - use the ceiling of whatever
+        // the devicePixelRatio is. This needs more memory, but looks nicer.
 
         originalDevicePixelRatio = Math.ceil(window.devicePixelRatio),
 
         canvasProto = HTMLCanvasElement.prototype,
         contextProto = CanvasRenderingContext2D.prototype,
 
-    // [Jens]: keep track of original properties in a dictionary
-    // so they can be iterated over and restored
+        // [Jens]: keep track of original properties in a dictionary
+        // so they can be iterated over and restored
         uber = {
             drawImage: contextProto.drawImage,
             getImageData: contextProto.getImageData,
@@ -1543,12 +1543,12 @@ function enableRetinaSupport() {
         };
 
     // [Jens]: only install retina utilities if the display supports them
-    if (backingStorePixelRatio === originalDevicePixelRatio) {return; }
+    if (backingStorePixelRatio === originalDevicePixelRatio) { return; }
     // [Jens]: check whether properties can be overridden, needed for Safari
     if (Object.keys(uber).some(function (any) {
         var prop = uber[any];
         return prop.hasOwnProperty('configurable') && (!prop.configurable);
-    })) {return; }
+    })) { return; }
 
     function getPixelRatio(imageSource) {
         return imageSource.isRetinaEnabled ?
@@ -1561,10 +1561,10 @@ function enableRetinaSupport() {
     canvasProto._bak = uber;
 
     Object.defineProperty(canvasProto, 'isRetinaEnabled', {
-        get: function() {
+        get: function () {
             return this._isRetinaEnabled;
         },
-        set: function(enabled) {
+        set: function (enabled) {
             var prevPixelRatio = getPixelRatio(this),
                 prevWidth = this.width,
                 prevHeight = this.height;
@@ -1579,10 +1579,10 @@ function enableRetinaSupport() {
     });
 
     Object.defineProperty(canvasProto, 'width', {
-        get: function() {
+        get: function () {
             return uber.width.get.call(this) / getPixelRatio(this);
         },
-        set: function(width) {
+        set: function (width) {
             try { // workaround one of FF's dreaded NS_ERROR_FAILURE bugs
                 // this should be taken out as soon as FF gets fixed again
                 var pixelRatio = getPixelRatio(this),
@@ -1600,10 +1600,10 @@ function enableRetinaSupport() {
     });
 
     Object.defineProperty(canvasProto, 'height', {
-        get: function() {
+        get: function () {
             return uber.height.get.call(this) / getPixelRatio(this);
         },
-        set: function(height) {
+        set: function (height) {
             var pixelRatio = getPixelRatio(this),
                 context;
             uber.height.set.call(this, height * pixelRatio);
@@ -1614,10 +1614,10 @@ function enableRetinaSupport() {
         }
     });
 
-    contextProto.drawImage = function(image) {
+    contextProto.drawImage = function (image) {
         var pixelRatio = getPixelRatio(image),
             sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight;
-        
+
         // Different signatures of drawImage() method have different
         // parameter assignments.
         switch (arguments.length) {
@@ -1656,59 +1656,59 @@ function enableRetinaSupport() {
 
             default:
                 throw Error('Called drawImage() with ' + arguments.length +
-                        ' arguments');
+                    ' arguments');
         }
         uber.drawImage.call(
-                this, image,
-                sx * pixelRatio, sy * pixelRatio,
-                sWidth * pixelRatio, sHeight * pixelRatio,
-                dx, dy,
-                dWidth, dHeight);
+            this, image,
+            sx * pixelRatio, sy * pixelRatio,
+            sWidth * pixelRatio, sHeight * pixelRatio,
+            dx, dy,
+            dWidth, dHeight);
     };
 
-    contextProto.getImageData = function(sx, sy, sw, sh) {
+    contextProto.getImageData = function (sx, sy, sw, sh) {
         var pixelRatio = getPixelRatio(this.canvas);
         return uber.getImageData.call(
-                this,
-                sx * pixelRatio, sy * pixelRatio,
-                sw * pixelRatio, sh * pixelRatio);
+            this,
+            sx * pixelRatio, sy * pixelRatio,
+            sw * pixelRatio, sh * pixelRatio);
     };
 
     Object.defineProperty(contextProto, 'shadowOffsetX', {
-        get: function() {
+        get: function () {
             return uber.shadowOffsetX.get.call(this) /
                 getPixelRatio(this.canvas);
         },
-        set: function(offset) {
+        set: function (offset) {
             var pixelRatio = getPixelRatio(this.canvas);
             uber.shadowOffsetX.set.call(this, offset * pixelRatio);
         }
     });
 
     Object.defineProperty(contextProto, 'shadowOffsetY', {
-        get: function() {
+        get: function () {
             return uber.shadowOffsetY.get.call(this) /
                 getPixelRatio(this.canvas);
         },
-        set: function(offset) {
+        set: function (offset) {
             var pixelRatio = getPixelRatio(this.canvas);
             uber.shadowOffsetY.set.call(this, offset * pixelRatio);
         }
     });
 
     Object.defineProperty(contextProto, 'shadowBlur', {
-        get: function() {
+        get: function () {
             return uber.shadowBlur.get.call(this) /
                 getPixelRatio(this.canvas);
         },
-        set: function(blur) {
+        set: function (blur) {
             var pixelRatio = getPixelRatio(this.canvas);
             uber.shadowBlur.set.call(this, blur * pixelRatio);
         }
     });
 }
 
-function isRetinaSupported () {
+function isRetinaSupported() {
     var ctx = document.createElement("canvas").getContext("2d"),
         backingStorePixelRatio = ctx.webkitBackingStorePixelRatio ||
             ctx.mozBackingStorePixelRatio ||
@@ -1747,10 +1747,10 @@ function isRetinaSupported () {
             var prop = uber[any];
             return prop.hasOwnProperty('configurable') && (!prop.configurable);
         })
-    );
+        );
 }
 
-function isRetinaEnabled () {
+function isRetinaEnabled() {
     return HTMLCanvasElement.prototype.hasOwnProperty('_isRetinaEnabled');
 }
 
@@ -1758,7 +1758,7 @@ function disableRetinaSupport() {
     // uninstalls Retina utilities. Make sure to re-create every Canvas
     // element afterwards
     var canvasProto, contextProto, uber;
-    if (!isRetinaEnabled()) {return; }
+    if (!isRetinaEnabled()) { return; }
     canvasProto = HTMLCanvasElement.prototype;
     contextProto = CanvasRenderingContext2D.prototype;
     uber = canvasProto._bak;
@@ -1778,10 +1778,10 @@ function normalizeCanvas(aCanvas, getCopy) {
     // make sure aCanvas is non-retina, otherwise convert it in place (!)
     // or answer a normalized copy if the "getCopy" flag is <true>
     var cpy;
-    if (!aCanvas.isRetinaEnabled) {return aCanvas; }
+    if (!aCanvas.isRetinaEnabled) { return aCanvas; }
     cpy = newCanvas(new Point(aCanvas.width, aCanvas.height), true);
     cpy.getContext('2d').drawImage(aCanvas, 0, 0);
-    if (getCopy) {return cpy; }
+    if (getCopy) { return cpy; }
     aCanvas.isRetinaEnabled = false;
     aCanvas.width = cpy.width;
     aCanvas.height = cpy.height;
@@ -1809,12 +1809,12 @@ function normalizeCanvas(aCanvas, getCopy) {
     stepping mechanism.
 
     For an example how to use animations look at how the Morph's methods
-    
+
         glideTo()
         fadeTo()
 
     and
-    
+
         slideBackTo()
 
     are implemented.
@@ -1828,8 +1828,8 @@ function Animation(setter, getter, delta, duration, easing, onComplete) {
     this.delta = delta || 0; // number
     this.duration = duration || 0; // milliseconds
     this.easing = isString(easing) ? // string or function
-            this.easings[easing] || this.easings.sinusoidal
-                : easing || this.easings.sinusoidal;
+        this.easings[easing] || this.easings.sinusoidal
+        : easing || this.easings.sinusoidal;
     this.onComplete = onComplete || null; // optional callback
     this.endTime = null;
     this.destination = null;
@@ -1842,36 +1842,36 @@ Animation.prototype.easings = {
     // two states
 
     // ease both in and out:
-    linear: function (t) {return t; },
-    sinusoidal: function (t) {return 1 - Math.cos(radians(t * 90)); },
+    linear: function (t) { return t; },
+    sinusoidal: function (t) { return 1 - Math.cos(radians(t * 90)); },
     quadratic: function (t) {
         return t < 0.5 ?
-                2 * t * t
-                    : ((4 - (2 * t)) * t) - 1;
+            2 * t * t
+            : ((4 - (2 * t)) * t) - 1;
     },
     cubic: function (t) {
         return t < 0.5 ?
-                4 * t * t * t
-                    : ((t - 1) * ((2 * t) - 2) * ((2 * t) - 2)) + 1;
+            4 * t * t * t
+            : ((t - 1) * ((2 * t) - 2) * ((2 * t) - 2)) + 1;
     },
     elastic: function (t) {
         return (t -= 0.5) < 0 ?
             (0.01 + 0.01 / t) * Math.sin(50 * t)
-                : (0.02 - 0.01 / t) * Math.sin(50 * t) + 1;
+            : (0.02 - 0.01 / t) * Math.sin(50 * t) + 1;
     },
 
     // ease in only:
-    sine_in: function (t) {return 1 - Math.sin(radians(90 + (t * 90))); },
-    quad_in: function (t) {return t * t; },
-    cubic_in: function (t) {return t * t * t; },
+    sine_in: function (t) { return 1 - Math.sin(radians(90 + (t * 90))); },
+    quad_in: function (t) { return t * t; },
+    cubic_in: function (t) { return t * t * t; },
     elastic_in: function (t) {
         return (0.04 - 0.04 / t) * Math.sin(25 * t) + 1;
     },
 
     // ease out only:
-    sine_out: function (t) {return Math.sin(radians(t * 90)); },
-    quad_out: function (t) {return t * (2 - t); },
-    elastic_out: function (t) {return 0.04 * t / (--t) * Math.sin(25 * t); }
+    sine_out: function (t) { return Math.sin(radians(t * 90)); },
+    quad_out: function (t) { return t * (2 - t); },
+    elastic_out: function (t) { return 0.04 * t / (--t) * Math.sin(25 * t); }
 };
 
 Animation.prototype.start = function () {
@@ -1884,16 +1884,16 @@ Animation.prototype.start = function () {
 };
 
 Animation.prototype.step = function () {
-    if (!this.isActive) {return; }
+    if (!this.isActive) { return; }
     var now = Date.now();
     if (now > this.endTime) {
         this.setter(this.destination);
         this.isActive = false;
-        if (this.onComplete) {this.onComplete(); }
+        if (this.onComplete) { this.onComplete(); }
     } else {
         this.setter(
             this.destination -
-                (this.delta * this.easing((this.endTime - now) / this.duration))
+            (this.delta * this.easing((this.endTime - now) / this.duration))
         );
     }
 };
@@ -1929,7 +1929,7 @@ Color.prototype.toRGBstring = function () {
 
 Color.fromString = function (aString) {
     // I parse rgb/rgba strings into a Color object
-    var components = aString.split(/[\(),]/).slice(1,5);
+    var components = aString.split(/[\(),]/).slice(1, 5);
     return new Color(components[0], components[1], components[2], components[3]);
 };
 
@@ -1974,15 +1974,15 @@ Color.prototype.hsv = function () {
         h = 0;
     } else {
         switch (max) {
-        case rr:
-            h = (gg - bb) / d + (gg < bb ? 6 : 0);
-            break;
-        case gg:
-            h = (bb - rr) / d + 2;
-            break;
-        case bb:
-            h = (rr - gg) / d + 4;
-            break;
+            case rr:
+                h = (gg - bb) / d + (gg < bb ? 6 : 0);
+                break;
+            case gg:
+                h = (bb - rr) / d + 2;
+                break;
+            case bb:
+                h = (rr - gg) / d + 4;
+                break;
         }
         h /= 6;
     }
@@ -1998,36 +1998,36 @@ Color.prototype.set_hsv = function (h, s, v) {
     q = v * (1 - f * s);
     t = v * (1 - (1 - f) * s);
     switch (i % 6) {
-    case 0:
-        this.r = v;
-        this.g = t;
-        this.b = p;
-        break;
-    case 1:
-        this.r = q;
-        this.g = v;
-        this.b = p;
-        break;
-    case 2:
-        this.r = p;
-        this.g = v;
-        this.b = t;
-        break;
-    case 3:
-        this.r = p;
-        this.g = q;
-        this.b = v;
-        break;
-    case 4:
-        this.r = t;
-        this.g = p;
-        this.b = v;
-        break;
-    case 5:
-        this.r = v;
-        this.g = p;
-        this.b = q;
-        break;
+        case 0:
+            this.r = v;
+            this.g = t;
+            this.b = p;
+            break;
+        case 1:
+            this.r = q;
+            this.g = v;
+            this.b = p;
+            break;
+        case 2:
+            this.r = p;
+            this.g = v;
+            this.b = t;
+            break;
+        case 3:
+            this.r = p;
+            this.g = q;
+            this.b = v;
+            break;
+        case 4:
+            this.r = t;
+            this.g = p;
+            this.b = v;
+            break;
+        case 5:
+            this.r = v;
+            this.g = p;
+            this.b = q;
+            break;
     }
 
     this.r *= 255;
@@ -2055,15 +2055,15 @@ Color.prototype.hsl = function () {
         d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
         switch (max) {
-        case rr:
-            h = (gg - bb) / d + (gg < bb ? 6 : 0);
-            break;
-        case gg:
-            h = (bb - rr) / d + 2;
-            break;
-        case bb:
-            h = (rr - gg) / d + 4;
-            break;
+            case rr:
+                h = (gg - bb) / d + (gg < bb ? 6 : 0);
+                break;
+            case gg:
+                h = (bb - rr) / d + 2;
+                break;
+            case bb:
+                h = (rr - gg) / d + 4;
+                break;
         }
         h /= 6;
     }
@@ -2081,14 +2081,14 @@ Color.prototype.set_hsl = function (h, s, l) {
         if (t > 1) {
             t -= 1;
         }
-        if (t < 1/6) {
+        if (t < 1 / 6) {
             return p + (q - p) * 6 * t;
         }
-        if (t < 1/2) {
+        if (t < 1 / 2) {
             return q;
         }
-        if (t < 2/3) {
-            return p + (q - p) * (2/3 - t) * 6;
+        if (t < 2 / 3) {
+            return p + (q - p) * (2 / 3 - t) * 6;
         }
         return p;
     }
@@ -2100,9 +2100,9 @@ Color.prototype.set_hsl = function (h, s, l) {
     } else {
         q = l < 0.5 ? l * (1 + s) : l + s - l * s;
         p = 2 * l - q;
-        this.r = hue2rgb(p, q, h + 1/3);
+        this.r = hue2rgb(p, q, h + 1 / 3);
         this.g = hue2rgb(p, q, h);
-        this.b = hue2rgb(p, q, h - 1/3);
+        this.b = hue2rgb(p, q, h - 1 / 3);
     }
 
     this.r *= 255;
@@ -2293,10 +2293,10 @@ Point.prototype.r = function () {
 };
 
 Point.prototype.degrees = function () {
-/*
-    answer the angle I make with origin in degrees.
-    Right is 0, down is 90
-*/
+    /*
+        answer the angle I make with origin in degrees.
+        Right is 0, down is 90
+    */
     var tan, theta;
 
     if (this.x === 0) {
@@ -2317,10 +2317,10 @@ Point.prototype.degrees = function () {
 };
 
 Point.prototype.theta = function () {
-/*
-    answer the angle I make with origin in radians.
-    Right is 0, down is 90
-*/
+    /*
+        answer the angle I make with origin in radians.
+        Right is 0, down is 90
+    */
     var tan, theta;
 
     if (this.x === 0) {
@@ -2422,7 +2422,7 @@ Point.prototype.asArray = function () {
 
 function Rectangle(left, top, right, bottom) {
     this.init(new Point((left || 0), (top || 0)),
-            new Point((right || 0), (bottom || 0)));
+        new Point((right || 0), (bottom || 0)));
 }
 
 Rectangle.prototype.init = function (originPoint, cornerPoint) {
@@ -2529,9 +2529,9 @@ Rectangle.prototype.center = function () {
 
 Rectangle.prototype.corners = function () {
     return [this.origin,
-        this.bottomLeft(),
-        this.corner,
-        this.topRight()];
+    this.bottomLeft(),
+    this.corner,
+    this.topRight()];
 };
 
 Rectangle.prototype.extent = function () {
@@ -2655,11 +2655,11 @@ Rectangle.prototype.spread = function () {
 };
 
 Rectangle.prototype.amountToTranslateWithin = function (aRect) {
-/*
-    Answer a Point, delta, such that self + delta is forced within
-    aRectangle. when all of me cannot be made to fit, prefer to keep
-    my topLeft inside. Taken from Squeak.
-*/
+    /*
+        Answer a Point, delta, such that self + delta is forced within
+        aRectangle. when all of me cannot be made to fit, prefer to keep
+        my topLeft inside. Taken from Squeak.
+    */
     var dx = 0, dy = 0;
 
     if (this.right() > aRect.right()) {
@@ -2699,7 +2699,7 @@ Rectangle.prototype.intersects = function (aRect) {
 Rectangle.prototype.isNearTo = function (aRect, threshold) {
     var ro = aRect.origin, rc = aRect.corner, border = threshold || 0;
     return (rc.x + border >= this.origin.x) &&
-        (rc.y  + border >= this.origin.y) &&
+        (rc.y + border >= this.origin.y) &&
         (ro.x - border <= this.corner.x) &&
         (ro.y - border <= this.corner.y);
 };
@@ -2943,7 +2943,7 @@ Morph.prototype.init = function (noDraw) {
     this.isTemplate = false;
     this.acceptsDrops = false;
     this.noticesTransparentClick = false;
-    if (!noDraw) {this.drawNew(); }
+    if (!noDraw) { this.drawNew(); }
     this.fps = 0;
     this.customContextMenu = null;
     this.lastTime = Date.now();
@@ -3235,7 +3235,7 @@ Morph.prototype.keepWithin = function (aMorph) {
 Morph.prototype.scrollIntoView = function () {
     var leftOff, rightOff, topOff, bottomOff,
         sf = this.parentThatIsA(ScrollFrameMorph);
-    if (!sf) {return; }
+    if (!sf) { return; }
     rightOff = Math.min(
         this.fullBounds().right() - sf.right(),
         sf.contents.right() - sf.right()
@@ -3416,7 +3416,7 @@ Morph.prototype.fullDrawOn = function (aCanvas, aRect) {
     }
     rectangle = aRect || this.cachedFullBounds || this.fullBounds();
     this.drawOn(aCanvas, rectangle);
-    if (this.cachedFullImage) {return; }
+    if (this.cachedFullImage) { return; }
     this.children.forEach(function (child) {
         child.fullDrawOn(aCanvas, rectangle);
     });
@@ -3657,14 +3657,14 @@ Morph.prototype.addBack = function (aMorph) {
 
 Morph.prototype.topMorphAt = function (point) {
     var i, result;
-    if (!this.isVisible) {return null; }
+    if (!this.isVisible) { return null; }
     for (i = this.children.length - 1; i >= 0; i -= 1) {
         result = this.children[i].topMorphAt(point);
-        if (result) {return result; }
+        if (result) { return result; }
     }
     return this.bounds.containsPoint(point) &&
         (this.noticesTransparentClick || !this.isTransparentAt(point)) ? this
-              : null;
+        : null;
 };
 
 Morph.prototype.topMorphSuchThat = function (predicate) {
@@ -3815,9 +3815,9 @@ Morph.prototype.rootForGrab = function () {
         return this.parent;
     }
     if (this.parent === null ||
-            this.parent instanceof WorldMorph ||
-            this.parent instanceof FrameMorph ||
-            this.isDraggable === true) {
+        this.parent instanceof WorldMorph ||
+        this.parent instanceof FrameMorph ||
+        this.isDraggable === true) {
         return this;
     }
     return this.parent.rootForGrab();
@@ -3833,8 +3833,8 @@ Morph.prototype.isCorrectingOutsideDrag = function () {
 Morph.prototype.wantsDropOf = function (aMorph) {
     // default is to answer the general flag - change for my heirs
     if ((aMorph instanceof HandleMorph) ||
-            (aMorph instanceof MenuMorph) ||
-            (aMorph instanceof InspectorMorph)) {
+        (aMorph instanceof MenuMorph) ||
+        (aMorph instanceof InspectorMorph)) {
         return false;
     }
     return this.acceptsDrops;
@@ -3880,12 +3880,12 @@ Morph.prototype.slideBackTo = function (
         null, // easing
         function () {
             situation.origin.add(myself);
-            if (onBeforeDrop) {onBeforeDrop(); }
-            if (myself.justDropped) {myself.justDropped(); }
+            if (onBeforeDrop) { onBeforeDrop(); }
+            if (myself.justDropped) { myself.justDropped(); }
             if (situation.origin.reactToDropOf) {
                 situation.origin.reactToDropOf(myself);
             }
-            if (onComplete) {onComplete(); }
+            if (onComplete) { onComplete(); }
         }
     );
 };
@@ -3896,16 +3896,16 @@ Morph.prototype.glideTo = function (endPoint, msecs, easing, onComplete) {
     var world = this.world(),
         myself = this;
     world.animations.push(new Animation(
-        function (x) {myself.setLeft(x); },
-        function () {return myself.left(); },
+        function (x) { myself.setLeft(x); },
+        function () { return myself.left(); },
         -(this.left() - endPoint.x),
         msecs || 100,
         easing,
         onComplete
     ));
     world.animations.push(new Animation(
-        function (y) {myself.setTop(y); },
-        function () {return myself.top(); },
+        function (y) { myself.setTop(y); },
+        function () { return myself.top(); },
         -(this.top() - endPoint.y),
         msecs || 100,
         easing
@@ -3926,13 +3926,13 @@ Morph.prototype.fadeTo = function (endAlpha, msecs, easing, onComplete) {
             myself.alpha = n;
             myself.changed();
         },
-        function () {return myself.alpha; },
+        function () { return myself.alpha; },
         endAlpha - this.alpha,
         msecs || 200,
         easing,
         function () {
             myself.alpha = oldAlpha;
-            if (onComplete) {onComplete(); }
+            if (onComplete) { onComplete(); }
         }
     ));
 };
@@ -3945,7 +3945,7 @@ Morph.prototype.perish = function (msecs, onComplete) {
         null,
         function () {
             myself.destroy();
-            if (onComplete) {onComplete(); }
+            if (onComplete) { onComplete(); }
         }
     );
 };
@@ -4114,7 +4114,7 @@ Morph.prototype.pickColor = function (
 
 Morph.prototype.inspect = function (anotherObject) {
     var world = this.world instanceof Function ?
-            this.world() : this.root() || this.world,
+        this.world() : this.root() || this.world,
         inspector,
         inspectee = this;
 
@@ -4158,11 +4158,11 @@ Morph.prototype.hierarchyMenu = function () {
                 each.toString().slice(0, 50),
                 each.developersMenu()
             );
-        /*
-            menu.addItem(each.toString().slice(0, 50), function () {
-                each.developersMenu().popUpAtHand(world);
-            });
-        */
+            /*
+                menu.addItem(each.toString().slice(0, 50), function () {
+                    each.developersMenu().popUpAtHand(world);
+                });
+            */
         }
     });
     return menu;
@@ -4211,7 +4211,7 @@ Morph.prototype.developersMenu = function () {
         "resize...",
         'resize',
         'show a handle\nwhich can be dragged\nto change this morph\'s' +
-            ' extent'
+        ' extent'
     );
     menu.addLine();
     menu.addItem(
@@ -4370,11 +4370,11 @@ Morph.prototype.previousEntryField = function (current) {
 };
 
 Morph.prototype.tab = function (editField) {
-/*
-    the <tab> key was pressed in one of my edit fields.
-    invoke my "nextTab()" function if it exists, else
-    propagate it up my owner chain.
-*/
+    /*
+        the <tab> key was pressed in one of my edit fields.
+        invoke my "nextTab()" function if it exists, else
+        propagate it up my owner chain.
+    */
     if (this.nextTab) {
         this.nextTab(editField);
     } else if (this.parent) {
@@ -4383,11 +4383,11 @@ Morph.prototype.tab = function (editField) {
 };
 
 Morph.prototype.backTab = function (editField) {
-/*
-    the <back tab> key was pressed in one of my edit fields.
-    invoke my "previousTab()" function if it exists, else
-    propagate it up my owner chain.
-*/
+    /*
+        the <back tab> key was pressed in one of my edit fields.
+        invoke my "previousTab()" function if it exists, else
+        propagate it up my owner chain.
+    */
     if (this.previousTab) {
         this.previousTab(editField);
     } else if (this.parent) {
@@ -4533,7 +4533,7 @@ HandleMorph.prototype.init = function (
     this.target = target || null;
     this.minExtent = new Point(minX || 0, minY || 0);
     this.inset = new Point(insetX || 0, insetY || insetX || 0);
-    this.type =  type || 'resize'; // also: 'move', 'moveCenter', 'movePivot'
+    this.type = type || 'resize'; // also: 'move', 'moveCenter', 'movePivot'
     HandleMorph.uber.init.call(this);
     this.color = new Color(255, 255, 255);
     this.isDraggable = false;
@@ -4925,21 +4925,21 @@ PenMorph.prototype.developersMenu = function () {
 
 PenMorph.prototype.setRotation = function () {
     var menu, dial,
-    	name = this.name || this.constructor.name;
+        name = this.name || this.constructor.name;
     if (name.length > 10) {
-    	name = name.slice(0, 9) + '...';
+        name = name.slice(0, 9) + '...';
     }
     menu = new MenuMorph(this, name);
     dial = new DialMorph(null, null, this.heading);
-    dial.rootForGrab = function () {return this; };
+    dial.rootForGrab = function () { return this; };
     dial.target = this;
     dial.action = 'setHeading';
     menu.items.push(dial);
     menu.addLine();
-    menu.addItem('(90) right', function () {this.setHeading(90); });
-    menu.addItem('(-90) left', function () {this.setHeading(-90); });
-    menu.addItem('(0) up', function () {this.setHeading(0); });
-    menu.addItem('(180) down', function () {this.setHeading(180); });
+    menu.addItem('(90) right', function () { this.setHeading(90); });
+    menu.addItem('(-90) left', function () { this.setHeading(-90); });
+    menu.addItem('(0) up', function () { this.setHeading(0); });
+    menu.addItem('(180) down', function () { this.setHeading(180); });
     menu.isDraggable = true;
     menu.popUpAtHand(this.world());
 };
@@ -5143,7 +5143,7 @@ ColorPaletteMorph.prototype.developersMenu = function () {
         'set target',
         "setTarget",
         'choose another morph\nwhose color property\n will be' +
-            ' controlled by this one'
+        ' controlled by this one'
     );
     return menu;
 };
@@ -5353,7 +5353,7 @@ CursorMorph.prototype.init = function (aStringOrTextMorph) {
     this.drawNew();
     this.image.getContext('2d').font = this.target.font();
     if (this.target instanceof TextMorph &&
-            (this.target.alignment !== 'left')) {
+        (this.target.alignment !== 'left')) {
         this.target.setAlignmentToLeft();
     }
     this.gotoSlot(this.slot);
@@ -5398,7 +5398,7 @@ CursorMorph.prototype.initializeClipboardHandler = function () {
 
             // Make sure tab prevents default
             if (event.key === 'U+0009' ||
-                    event.key === 'Tab') {
+                event.key === 'Tab') {
                 myself.processKeyPress(event);
                 event.preventDefault();
             }
@@ -5488,70 +5488,70 @@ CursorMorph.prototype.processKeyDown = function (event) {
     }
 
     switch (event.keyCode) {
-    case 37:
-        if (selecting && !shift && !wordNavigation) {
-            this.gotoSlot(Math.min(this.target.startMark, this.target.endMark));
-            this.target.clearSelection();
-        } else {
-            this.goLeft(
+        case 37:
+            if (selecting && !shift && !wordNavigation) {
+                this.gotoSlot(Math.min(this.target.startMark, this.target.endMark));
+                this.target.clearSelection();
+            } else {
+                this.goLeft(
                     shift,
                     wordNavigation ?
                         this.slot - this.target.previousWordFrom(this.slot)
                         : 1);
-        }
-        this.keyDownEventUsed = true;
-        break;
-    case 39:
-        if (selecting && !shift && !wordNavigation) {
-            this.gotoSlot(Math.max(this.target.startMark, this.target.endMark));
-            this.target.clearSelection();
-        } else {
-            this.goRight(
+            }
+            this.keyDownEventUsed = true;
+            break;
+        case 39:
+            if (selecting && !shift && !wordNavigation) {
+                this.gotoSlot(Math.max(this.target.startMark, this.target.endMark));
+                this.target.clearSelection();
+            } else {
+                this.goRight(
                     shift,
                     wordNavigation ?
                         this.target.nextWordFrom(this.slot) - this.slot
                         : 1);
-        }
-        this.keyDownEventUsed = true;
-        break;
-    case 38:
-        this.goUp(shift);
-        this.keyDownEventUsed = true;
-        break;
-    case 40:
-        this.goDown(shift);
-        this.keyDownEventUsed = true;
-        break;
-    case 36:
-        this.goHome(shift);
-        this.keyDownEventUsed = true;
-        break;
-    case 35:
-        this.goEnd(shift);
-        this.keyDownEventUsed = true;
-        break;
-    case 46:
-        this.deleteRight();
-        this.keyDownEventUsed = true;
-        break;
-    case 8:
-        this.deleteLeft();
-        this.keyDownEventUsed = true;
-        break;
-    case 13:
-        if ((this.target instanceof StringMorph) || shift) {
-            this.accept();
-        } else {
-            this.insert('\n');
-        }
-        this.keyDownEventUsed = true;
-        break;
-    case 27:
-        this.cancel();
-        this.keyDownEventUsed = true;
-        break;
-    default:
-        nop();
+            }
+            this.keyDownEventUsed = true;
+            break;
+        case 38:
+            this.goUp(shift);
+            this.keyDownEventUsed = true;
+            break;
+        case 40:
+            this.goDown(shift);
+            this.keyDownEventUsed = true;
+            break;
+        case 36:
+            this.goHome(shift);
+            this.keyDownEventUsed = true;
+            break;
+        case 35:
+            this.goEnd(shift);
+            this.keyDownEventUsed = true;
+            break;
+        case 46:
+            this.deleteRight();
+            this.keyDownEventUsed = true;
+            break;
+        case 8:
+            this.deleteLeft();
+            this.keyDownEventUsed = true;
+            break;
+        case 13:
+            if ((this.target instanceof StringMorph) || shift) {
+                this.accept();
+            } else {
+                this.insert('\n');
+            }
+            this.keyDownEventUsed = true;
+            break;
+        case 27:
+            this.cancel();
+            this.keyDownEventUsed = true;
+            break;
+        default:
+            nop();
         // this.inspectKeyEvent(event);
     }
     // notify target's parent of key event
@@ -5588,7 +5588,7 @@ CursorMorph.prototype.gotoSlot = function (slot) {
             pos.x = left;
         }
         if (this.target.right() < right &&
-                right - this.target.width() < left) {
+            right - this.target.width() < left) {
             pos.x += right - this.target.right();
             this.target.setRight(right);
         }
@@ -5596,8 +5596,8 @@ CursorMorph.prototype.gotoSlot = function (slot) {
     this.show();
     this.setPosition(pos);
     if (this.parent
-            && this.parent.parent instanceof ScrollFrameMorph
-            && this.target.isScrollable) {
+        && this.parent.parent instanceof ScrollFrameMorph
+        && this.target.isScrollable) {
         this.parent.parent.scrollCursorIntoView(this);
     }
 };
@@ -5697,8 +5697,8 @@ CursorMorph.prototype.insert = function (aChar, shiftKey) {
         return this.target.tab(this.target);
     }
     if (!this.target.isNumeric ||
-            !isNaN(parseFloat(aChar)) ||
-            contains(['-', '.'], aChar)) {
+        !isNaN(parseFloat(aChar)) ||
+        contains(['-', '.'], aChar)) {
         if (this.target.selection() !== '') {
             this.gotoSlot(this.target.selectionStartSlot());
             this.target.deleteSelection();
@@ -5821,22 +5821,22 @@ CursorMorph.prototype.inspectKeyEvent = function (event) {
     // private
     this.inform(
         'Key pressed: ' +
-            String.fromCharCode(event.charCode) +
-            '\n------------------------' +
-            '\ncharCode: ' +
-            event.charCode.toString() +
-            '\nkeyCode: ' +
-            event.keyCode.toString() +
-            '\nkey: ' +
-            event.key.toString() +
-            '\nshiftKey: ' +
-            event.shiftKey.toString() +
-            '\naltKey: ' +
-            event.altKey.toString() +
-            '\nctrlKey: ' +
-            event.ctrlKey.toString() +
-            '\ncmdKey: ' +
-            event.metaKey.toString()
+        String.fromCharCode(event.charCode) +
+        '\n------------------------' +
+        '\ncharCode: ' +
+        event.charCode.toString() +
+        '\nkeyCode: ' +
+        event.keyCode.toString() +
+        '\nkey: ' +
+        event.key.toString() +
+        '\nshiftKey: ' +
+        event.shiftKey.toString() +
+        '\naltKey: ' +
+        event.altKey.toString() +
+        '\nctrlKey: ' +
+        event.ctrlKey.toString() +
+        '\ncmdKey: ' +
+        event.metaKey.toString()
     );
 };
 
@@ -6381,56 +6381,56 @@ DialMorph.prototype.init = function (min, max, value, tick, radius) {
 };
 
 DialMorph.prototype.setRadius = function (radius) {
-	this.radius = radius;
+    this.radius = radius;
     this.setExtent(new Point(this.radius * 2, this.radius * 2));
 };
 
 DialMorph.prototype.setValue = function (value, snapToTick, noUpdate) {
-	var range = this.max - this.min;
- 	value = value || 0;
+    var range = this.max - this.min;
+    value = value || 0;
     this.value = this.min + (((+value % range) + range) % range);
     if (snapToTick) {
-    	if (this.value < this.tick) {
-     		this.value = this.min;
-       	} else {
-    		this.value -= this.value % this.tick % this.value;
+        if (this.value < this.tick) {
+            this.value = this.min;
+        } else {
+            this.value -= this.value % this.tick % this.value;
         }
     }
-	this.drawNew();
- 	this.changed();
-  	if (noUpdate) {return; }
-  	this.updateTarget();
+    this.drawNew();
+    this.changed();
+    if (noUpdate) { return; }
+    this.updateTarget();
 };
 
 DialMorph.prototype.getValueOf = function (point) {
     var range = this.max - this.min,
-    	center = this.center(),
+        center = this.center(),
         deltaX = point.x - center.x,
         deltaY = center.y - point.y,
         angle = Math.abs(deltaX) < 0.001 ? (deltaY < 0 ? 90 : 270)
-                : Math.round(
+            : Math.round(
                 (deltaX >= 0 ? 0 : 180)
-                    - (Math.atan(deltaY / deltaX) * 57.2957795131)
-        		),
+                - (Math.atan(deltaY / deltaX) * 57.2957795131)
+            ),
         value = angle + 90 % 360,
         ratio = value / 360;
     return range * ratio + this.min;
 };
 
 DialMorph.prototype.setExtent = function (aPoint) {
-	var size = Math.min(aPoint.x, aPoint.y);
-	this.radius = size / 2;
+    var size = Math.min(aPoint.x, aPoint.y);
+    this.radius = size / 2;
     DialMorph.uber.setExtent.call(this, new Point(size, size));
 };
 
 DialMorph.prototype.drawNew = function () {
     var ctx, i, angle, x1, y1, x2, y2,
-    	light = this.color.lighter().toString(),
-    	range = this.max - this.min,
-     	ticks = range / this.tick,
-      	face = this.radius * 0.75,
-      	inner = face * 0.85,
-       	outer = face * 0.95;
+        light = this.color.lighter().toString(),
+        range = this.max - this.min,
+        ticks = range / this.tick,
+        face = this.radius * 0.75,
+        inner = face * 0.85,
+        outer = face * 0.95;
 
     this.image = newCanvas(this.extent());
     ctx = this.image.getContext('2d');
@@ -6449,7 +6449,7 @@ DialMorph.prototype.drawNew = function () {
     ctx.closePath();
     ctx.fill();
 
-	// fill circle:
+    // fill circle:
     ctx.fillStyle = this.color.toString();
     ctx.beginPath();
     ctx.arc(
@@ -6462,16 +6462,16 @@ DialMorph.prototype.drawNew = function () {
     );
     ctx.closePath();
     ctx.fill();
-    
+
     // fill value
     angle = (this.value - this.min) * (Math.PI * 2) / range - Math.PI / 2;
     ctx.fillStyle = (this.fillColor || this.color.darker()).toString();
     ctx.beginPath();
     ctx.arc(
-    	this.radius,
-     	this.radius,
-      	face,
-       	Math.PI / -2,
+        this.radius,
+        this.radius,
+        face,
+        Math.PI / -2,
         angle,
         false
     );
@@ -6479,22 +6479,22 @@ DialMorph.prototype.drawNew = function () {
     ctx.closePath();
     ctx.fill();
 
-	// draw ticks:
- 	ctx.strokeStyle = new Color(35, 35, 35).toString();
-  	ctx.lineWidth = 1;
- 	for (i = 0; i < ticks; i += 1) {
-  		angle = (i - 3) * (Math.PI * 2) / ticks - Math.PI / 2;
-    	ctx.beginPath();
-     	x1 = this.radius + Math.cos(angle) * inner;
-      	y1 = this.radius + Math.sin(angle) * inner;
-       	x2 = this.radius + Math.cos(angle) * outer;
+    // draw ticks:
+    ctx.strokeStyle = new Color(35, 35, 35).toString();
+    ctx.lineWidth = 1;
+    for (i = 0; i < ticks; i += 1) {
+        angle = (i - 3) * (Math.PI * 2) / ticks - Math.PI / 2;
+        ctx.beginPath();
+        x1 = this.radius + Math.cos(angle) * inner;
+        y1 = this.radius + Math.sin(angle) * inner;
+        x2 = this.radius + Math.cos(angle) * outer;
         y2 = this.radius + Math.sin(angle) * outer;
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
         ctx.stroke();
-	}
+    }
 
-	// draw a filled center:
+    // draw a filled center:
     inner = face * 0.05;
     ctx.fillStyle = 'black';
     ctx.beginPath();
@@ -6517,7 +6517,7 @@ DialMorph.prototype.drawNew = function () {
     x1 = this.radius + Math.cos(angle) * inner;
     y1 = this.radius + Math.sin(angle) * inner;
     x2 = this.radius + Math.cos(angle) * outer;
-	y2 = this.radius + Math.sin(angle) * outer;
+    y2 = this.radius + Math.sin(angle) * outer;
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
@@ -6549,15 +6549,15 @@ DialMorph.prototype.drawNew = function () {
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
-	ctx.lineWidth = 3;
- 	ctx.strokeStyle = light;
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = light;
     ctx.stroke();
     ctx.lineWidth = 1;
     ctx.strokeStyle = 'black';
     ctx.stroke();
 
     // draw arrow tip:
-	angle = radians(degrees(angle) - 4);
+    angle = radians(degrees(angle) - 4);
     x1 = this.radius + Math.cos(angle) * this.radius * 0.9;
     y1 = this.radius + Math.sin(angle) * this.radius * 0.9;
     ctx.beginPath();
@@ -6587,8 +6587,8 @@ DialMorph.prototype.mouseDownLeft = function (pos) {
     this.step = function () {
         if (world.hand.mouseButton) {
             myself.setValue(
-            	myself.getValueOf(world.hand.bounds.origin),
-             	world.currentKey !== 16 // snap to tick
+                myself.getValueOf(world.hand.bounds.origin),
+                world.currentKey !== 16 // snap to tick
             );
         } else {
             this.step = null;
@@ -6605,7 +6605,7 @@ DialMorph.prototype.developersMenu = function () {
         'set target',
         "setTarget",
         'select another morph\nwhose numerical property\nwill be ' +
-            'controlled by this one'
+        'controlled by this one'
     );
     return menu;
 };
@@ -6716,8 +6716,8 @@ CircleBoxMorph.prototype.drawNew = function () {
             this.bounds.corner.subtract(new Point(radius, 0))
         );
     }
-    points = [ center1.subtract(this.bounds.origin),
-        center2.subtract(this.bounds.origin)];
+    points = [center1.subtract(this.bounds.origin),
+    center2.subtract(this.bounds.origin)];
     points.forEach(function (center) {
         context.fillStyle = myself.color.toString();
         context.beginPath();
@@ -7063,7 +7063,7 @@ SliderMorph.prototype.drawNew = function () {
     SliderMorph.uber.drawNew.call(this);
     this.button.orientation = this.orientation;
     if (this.orientation === 'vertical') {
-        bw  = this.width() - 2;
+        bw = this.width() - 2;
         bh = Math.max(bw, Math.round(this.height() * this.ratio()));
         this.button.silentSetExtent(new Point(bw, bh));
         posX = 1;
@@ -7073,7 +7073,7 @@ SliderMorph.prototype.drawNew = function () {
         );
     } else {
         bh = this.height() - 2;
-        bw  = Math.max(bh, Math.round(this.width() * this.ratio()));
+        bw = Math.max(bh, Math.round(this.width() * this.ratio()));
         this.button.silentSetExtent(new Point(bw, bh));
         posY = 1;
         posX = Math.min(
@@ -7171,7 +7171,7 @@ SliderMorph.prototype.developersMenu = function () {
         'set target',
         "setTarget",
         'select another morph\nwhose numerical property\nwill be ' +
-            'controlled by this one'
+        'controlled by this one'
     );
     return menu;
 };
@@ -7203,7 +7203,7 @@ SliderMorph.prototype.setStart = function (num, noUpdate) {
         }
     }
     this.value = Math.max(this.value, this.start);
-    if (!noUpdate) {this.updateTarget(); }
+    if (!noUpdate) { this.updateTarget(); }
     this.drawNew();
     this.changed();
 };
@@ -7220,7 +7220,7 @@ SliderMorph.prototype.setStop = function (num, noUpdate) {
         }
     }
     this.value = Math.min(this.value, this.stop);
-    if (!noUpdate) {this.updateTarget(); }
+    if (!noUpdate) { this.updateTarget(); }
     this.drawNew();
     this.changed();
 };
@@ -7243,7 +7243,7 @@ SliderMorph.prototype.setSize = function (num, noUpdate) {
         }
     }
     this.value = Math.min(this.value, this.stop - this.size);
-    if (!noUpdate) {this.updateTarget(); }
+    if (!noUpdate) { this.updateTarget(); }
     this.drawNew();
     this.changed();
 };
@@ -7483,12 +7483,12 @@ InspectorMorph.prototype.updateCurrentSelection = function () {
         root = this.root();
 
     if (root &&
-            (root.keyboardReceiver instanceof CursorMorph) &&
-            (root.keyboardReceiver.target === currentTxt)) {
+        (root.keyboardReceiver instanceof CursorMorph) &&
+        (root.keyboardReceiver.target === currentTxt)) {
         this.hasUserEditedDetails = true;
         return;
     }
-    if (isNil(sel) || this.hasUserEditedDetails) {return; }
+    if (isNil(sel) || this.hasUserEditedDetails) { return; }
     val = this.target[sel];
     this.currentProperty = val;
     if (isNil(val)) {
@@ -7498,7 +7498,7 @@ InspectorMorph.prototype.updateCurrentSelection = function () {
     } else {
         txt = val.toString();
     }
-    if (currentTxt.text === txt) {return; }
+    if (currentTxt.text === txt) { return; }
     cnts = new TextMorph(txt);
     cnts.isEditable = true;
     cnts.enableSelecting();
@@ -7543,7 +7543,7 @@ InspectorMorph.prototype.buildPanes = function () {
 
     doubleClickAction = function () {
         var world, inspector;
-        if (!isObject(myself.currentProperty)) {return; }
+        if (!isObject(myself.currentProperty)) { return; }
         world = myself.world();
         inspector = new InspectorMorph(
             myself.currentProperty
@@ -7558,18 +7558,18 @@ InspectorMorph.prototype.buildPanes = function () {
         this.target instanceof Array ? attribs : attribs.sort(),
         null, // label getter
         this.markOwnProperties ?
-                [ // format list
-                    [ // format element: [color, predicate(element]
-                        new Color(0, 0, 180),
-                        function (element) {
-                            return Object.prototype.hasOwnProperty.call(
-                                myself.target,
-                                element
-                            );
-                        }
-                    ]
+            [ // format list
+                [ // format element: [color, predicate(element]
+                    new Color(0, 0, 180),
+                    function (element) {
+                        return Object.prototype.hasOwnProperty.call(
+                            myself.target,
+                            element
+                        );
+                    }
                 ]
-                : null,
+            ]
+            : null,
         doubleClickAction
     );
 
@@ -7646,7 +7646,7 @@ InspectorMorph.prototype.buildPanes = function () {
         menu.addLine();
         menu.addItem(
             (myself.markOwnProperties ?
-                    'un-mark own' : 'mark own'),
+                'un-mark own' : 'mark own'),
             function () {
                 myself.markOwnProperties = !myself.markOwnProperties;
                 myself.buildPanes();
@@ -7687,8 +7687,8 @@ InspectorMorph.prototype.buildPanes = function () {
         } else {
             myself.inform(
                 (myself.currentProperty === null ?
-                        'null' : typeof myself.currentProperty) +
-                            '\nis not inspectable'
+                    'null' : typeof myself.currentProperty) +
+                '\nis not inspectable'
             );
         }
     };
@@ -7899,7 +7899,7 @@ InspectorMorph.prototype.removeProperty = function () {
 InspectorMorph.prototype.step = function () {
     this.updateCurrentSelection();
     var lbl = this.target.toString();
-    if (this.label.text === lbl) {return; }
+    if (this.label.text === lbl) { return; }
     this.label.text = lbl;
     this.label.drawNew();
     this.fixLayout();
@@ -8083,9 +8083,9 @@ MenuMorph.prototype.drawNew = function () {
     this.items.forEach(function (tuple) {
         isLine = false;
         if (tuple instanceof StringFieldMorph ||
-                tuple instanceof ColorPickerMorph ||
-                tuple instanceof SliderMorph ||
-                tuple instanceof DialMorph) {
+            tuple instanceof ColorPickerMorph ||
+            tuple instanceof SliderMorph ||
+            tuple instanceof DialMorph) {
             item = tuple;
         } else if (tuple[0] === 0) {
             isLine = true;
@@ -8138,12 +8138,12 @@ MenuMorph.prototype.maxWidth = function () {
             w = Math.max(
                 w,
                 item.label.width() + 8 +
-                    (item.shortcut ? item.shortcut.width() + 4 : 0)
+                (item.shortcut ? item.shortcut.width() + 4 : 0)
             );
         } else if ((item instanceof StringFieldMorph) ||
-                (item instanceof ColorPickerMorph) ||
-                (item instanceof SliderMorph) ||
-                (item instanceof DialMorph)) {
+            (item instanceof ColorPickerMorph) ||
+            (item instanceof SliderMorph) ||
+            (item instanceof DialMorph)) {
             w = Math.max(w, item.width());
         }
     });
@@ -8158,8 +8158,8 @@ MenuMorph.prototype.adjustWidths = function () {
         isSelected,
         myself = this;
     this.children.forEach(function (item) {
-    	if (!(item instanceof DialMorph)) {
-        	item.silentSetWidth(w);
+        if (!(item instanceof DialMorph)) {
+            item.silentSetWidth(w);
         }
         if (item instanceof MenuItemMorph) {
             item.fixLayout();
@@ -8186,11 +8186,11 @@ MenuMorph.prototype.unselectAllItems = function () {
         if (item instanceof MenuItemMorph) {
             item.image = item.normalImage;
         } else if (item instanceof ScrollFrameMorph) {
-        	item.contents.children.forEach(function (morph) {
-         		if (morph instanceof MenuItemMorph) {
-           			morph.image = morph.normalImage;
-              	}
-         	});
+            item.contents.children.forEach(function (morph) {
+                if (morph instanceof MenuItemMorph) {
+                    morph.image = morph.normalImage;
+                }
+            });
         }
     });
     this.changed();
@@ -8199,7 +8199,7 @@ MenuMorph.prototype.unselectAllItems = function () {
 // MenuMorph popping up
 
 MenuMorph.prototype.popup = function (world, pos) {
-	var scroller;
+    var scroller;
 
     this.drawNew();
     this.setPosition(pos);
@@ -8207,15 +8207,15 @@ MenuMorph.prototype.popup = function (world, pos) {
     this.keepWithin(world);
 
     if (this.bottom() > world.bottom()) {
-    	// scroll menu items if the menu is taller than the world
-    	this.removeShadow();
+        // scroll menu items if the menu is taller than the world
+        this.removeShadow();
         scroller = this.scroll();
         this.bounds.corner.y = world.bottom() - 2;
         MenuMorph.uber.drawNew.call(this);
         this.addShadow(new Point(2, 2), 80);
         scroller.setHeight(world.bottom() - scroller.top() - 6);
         scroller.adjustScrollBars(); // ?
-     }
+    }
 
     if (world.activeMenu) {
         world.activeMenu.destroy();
@@ -8231,12 +8231,12 @@ MenuMorph.prototype.popup = function (world, pos) {
 
 MenuMorph.prototype.scroll = function () {
     // private - move all items into a scroll frame
-     var scroller = new ScrollFrameMorph(),
-          start = this.label ? 1 : 0,
+    var scroller = new ScrollFrameMorph(),
+        start = this.label ? 1 : 0,
         first = this.children[start];
 
     scroller.setPosition(first.position());
-      this.children.slice(start).forEach(function (morph) {
+    this.children.slice(start).forEach(function (morph) {
         scroller.addContents(morph);
     });
     this.add(scroller);
@@ -8301,27 +8301,27 @@ MenuMorph.prototype.getFocus = function () {
 MenuMorph.prototype.processKeyDown = function (event) {
     // console.log(event.keyCode);
     switch (event.keyCode) {
-    case 13: // 'enter'
-    case 32: // 'space'
-        if (this.selection) {
-            this.selection.mouseClickLeft();
-            if (this.submenu) {
-                this.submenu.getFocus();
+        case 13: // 'enter'
+        case 32: // 'space'
+            if (this.selection) {
+                this.selection.mouseClickLeft();
+                if (this.submenu) {
+                    this.submenu.getFocus();
+                }
             }
-        }
-        return;
-    case 27: // 'esc'
-        return this.destroy();
-    case 37: // 'left arrow'
-        return this.leaveSubmenu();
-    case 38: // 'up arrow'
-        return this.selectUp();
-    case 39: // 'right arrow'
-        return this.enterSubmenu();
-    case 40: // 'down arrow'
-        return this.selectDown();
-    default:
-        nop();
+            return;
+        case 27: // 'esc'
+            return this.destroy();
+        case 37: // 'left arrow'
+            return this.leaveSubmenu();
+        case 38: // 'up arrow'
+            return this.selectUp();
+        case 39: // 'right arrow'
+            return this.enterSubmenu();
+        case 40: // 'down arrow'
+            return this.selectDown();
+        default:
+            nop();
     }
 };
 
@@ -8337,27 +8337,27 @@ MenuMorph.prototype.selectFirst = function () {
     var scroller, items, i;
 
     scroller = detect(this.children, function (morph) {
-         return morph instanceof ScrollFrameMorph;
+        return morph instanceof ScrollFrameMorph;
     });
     items = scroller ? scroller.contents.children : this.children;
     for (i = 0; i < items.length; i += 1) {
         if (items[i] instanceof MenuItemMorph) {
             this.select(items[i]);
             return;
-    	}
-	}
+        }
+    }
 };
 
 MenuMorph.prototype.selectUp = function () {
     var scroller, triggers, idx;
 
-	scroller = detect(this.children, function (morph) {
- 		return morph instanceof ScrollFrameMorph;
+    scroller = detect(this.children, function (morph) {
+        return morph instanceof ScrollFrameMorph;
     });
     triggers = (scroller ? scroller.contents.children : this.children).filter(
-    	function (each) {
-        	return each instanceof MenuItemMorph;
-    	}
+        function (each) {
+            return each instanceof MenuItemMorph;
+        }
     );
     if (!this.selection) {
         if (triggers.length) {
@@ -8376,7 +8376,7 @@ MenuMorph.prototype.selectDown = function () {
     var scroller, triggers, idx;
 
     scroller = detect(this.children, function (morph) {
-         return morph instanceof ScrollFrameMorph;
+        return morph instanceof ScrollFrameMorph;
     });
     triggers = (scroller ? scroller.contents.children : this.children).filter(
         function (each) {
@@ -8548,7 +8548,7 @@ StringMorph.prototype.drawNew = function () {
     var context, width, start, stop, i, p, c, x, y,
         shadowOffset = this.shadowOffset || new Point(),
         txt = this.isPassword ?
-                this.password('*', this.text.length) : this.text;
+            this.password('*', this.text.length) : this.text;
 
     // initialize my surface property
     this.image = newCanvas();
@@ -8657,7 +8657,7 @@ StringMorph.prototype.slotPosition = function (slot) {
     // answer the position point of the given index ("slot")
     // where the cursor should be placed
     var txt = this.isPassword ?
-                this.password('*', this.text.length) : this.text,
+        this.password('*', this.text.length) : this.text,
         dest = Math.min(Math.max(slot, 0), txt.length),
         context = this.image.getContext('2d'),
         xOffset,
@@ -8681,7 +8681,7 @@ StringMorph.prototype.slotAt = function (aPoint) {
     // so the cursor can be moved accordingly
 
     var txt = this.isPassword ?
-                this.password('*', this.text.length) : this.text,
+        this.password('*', this.text.length) : this.text,
         idx = 0,
         charX = 0,
         context = this.image.getContext('2d');
@@ -8691,8 +8691,8 @@ StringMorph.prototype.slotAt = function (aPoint) {
         idx += 1;
         if (idx === txt.length) {
             if ((context.measureText(txt).width -
-                    (context.measureText(txt[idx - 1]).width / 2)) <
-                    (aPoint.x - this.left())) {
+                (context.measureText(txt[idx - 1]).width / 2)) <
+                (aPoint.x - this.left())) {
                 return idx;
             }
         }
@@ -8700,7 +8700,7 @@ StringMorph.prototype.slotAt = function (aPoint) {
 
     // see where our click fell with respect to the middle of the char
     if (aPoint.x - this.left() >
-            charX - context.measureText(txt[idx - 1]).width / 2) {
+        charX - context.measureText(txt[idx - 1]).width / 2) {
         return idx;
     } else {
         return idx - 1;
@@ -8731,7 +8731,7 @@ StringMorph.prototype.previousWordFrom = function (aSlot) {
     // answer the slot (index) slots indicating the position of the
     // previous word to the left of aSlot
     var index = aSlot - 1;
-    
+
     // while the current character is non-word one, we skip it, so that
     // if we are in the middle of a non-alphanumeric sequence, we'll get
     // right to the beginning of the previous word
@@ -8750,7 +8750,7 @@ StringMorph.prototype.previousWordFrom = function (aSlot) {
 
 StringMorph.prototype.nextWordFrom = function (aSlot) {
     var index = aSlot;
-    
+
     while (index < this.endOfLine() && !isWordChar(this.text[index])) {
         index += 1;
     }
@@ -8927,8 +8927,8 @@ StringMorph.prototype.selectionStartSlot = function () {
 
 StringMorph.prototype.clearSelection = function () {
     if (!this.currentlySelecting &&
-            isNil(this.startMark) &&
-            isNil(this.endMark)) {
+        isNil(this.startMark) &&
+        isNil(this.endMark)) {
         return;
     }
     this.currentlySelecting = false;
@@ -9056,7 +9056,7 @@ StringMorph.prototype.selectBetweenWordsAt = function (slot) {
     this.endMark = cursor.slot;
 
     while (this.endMark < this.text.length
-            && !isWordChar(this.text[this.endMark])) {
+        && !isWordChar(this.text[this.endMark])) {
         this.endMark += 1;
     }
 
@@ -9078,14 +9078,14 @@ StringMorph.prototype.enableSelecting = function () {
                 this.startMark = this.slotAt(pos);
                 this.endMark = this.startMark;
                 this.currentlySelecting = true;
-                if (!already) {this.escalateEvent('mouseDownLeft', pos); }
+                if (!already) { this.escalateEvent('mouseDownLeft', pos); }
             }
         }
     };
     this.mouseMove = function (pos) {
         if (this.isEditable &&
-                this.currentlySelecting &&
-                (!this.isDraggable)) {
+            this.currentlySelecting &&
+            (!this.isDraggable)) {
             var newMark = this.slotAt(pos);
             if (newMark !== this.endMark) {
                 this.endMark = newMark;
@@ -9410,7 +9410,7 @@ TextMorph.prototype.slotAt = function (aPoint) {
         context = this.image.getContext('2d');
 
     while (aPoint.y - this.top() >
-            ((fontHeight(this.fontSize) + shadowHeight) * row)) {
+        ((fontHeight(this.fontSize) + shadowHeight) * row)) {
         row += 1;
     }
     row = Math.max(row, 1);
@@ -9422,7 +9422,7 @@ TextMorph.prototype.slotAt = function (aPoint) {
 
     // see where our click fell with respect to the middle of the char
     if (aPoint.x - this.left() >
-            charX - context.measureText(this.lines[row - 1][col]).width / 2) {
+        charX - context.measureText(this.lines[row - 1][col]).width / 2) {
         return this.lineSlots[Math.max(row - 1, 0)] + col;
     } else {
         return this.lineSlots[Math.max(row - 1, 0)] + col - 1;
@@ -9825,7 +9825,7 @@ TriggerMorph.prototype.trigger = function () {
 TriggerMorph.prototype.triggerDoubleClick = function () {
     // same as trigger() but use doubleClickAction instead of action property
     // note that specifying a doubleClickAction is optional
-    if (!this.doubleClickAction) {return; }
+    if (!this.doubleClickAction) { return; }
     if (this.schedule) {
         this.schedule.isActive = false;
     }
@@ -9900,7 +9900,7 @@ TriggerMorph.prototype.bubbleHelp = function (contents) {
         0,
         500,
         nop,
-        function () {myself.popUpbubbleHelp(contents); }
+        function () { myself.popUpbubbleHelp(contents); }
     );
     world.animations.push(this.schedule);
 };
@@ -10115,7 +10115,7 @@ MenuItemMorph.prototype.mouseClickLeft = function () {
 };
 
 MenuItemMorph.prototype.isListItem = function () {
-	var menu = this.parentThatIsA(MenuMorph);
+    var menu = this.parentThatIsA(MenuMorph);
     if (menu) {
         return menu.isListContents;
     }
@@ -10148,19 +10148,19 @@ MenuItemMorph.prototype.delaySubmenu = function () {
         0,
         500,
         nop,
-        function () {myself.popUpSubmenu(); }
+        function () { myself.popUpSubmenu(); }
     );
     world.animations.push(this.schedule);
 };
 
 MenuItemMorph.prototype.popUpSubmenu = function () {
     var menu = this.parentThatIsA(MenuMorph);
-    if (!(this.action instanceof MenuMorph)) {return; }
+    if (!(this.action instanceof MenuMorph)) { return; }
     this.action.drawNew();
     this.action.setPosition(this.topRight().subtract(new Point(0, 5)));
     this.action.addShadow(new Point(2, 2), 80);
     this.action.keepWithin(this.world());
-    if (this.action.items.length < 1 && !this.action.title) {return; }
+    if (this.action.items.length < 1 && !this.action.title) { return; }
     menu.add(this.action);
     menu.submenu = this.action;
     menu.submenu.world = menu.world; // keyboard control
@@ -10238,7 +10238,7 @@ FrameMorph.prototype.topMorphAt = function (point) {
     }
     for (i = this.children.length - 1; i >= 0; i -= 1) {
         result = this.children[i].topMorphAt(point);
-        if (result) {return result; }
+        if (result) { return result; }
     }
     return this.noticesTransparentClick ||
         !this.isTransparentAt(point) ? this : null;
@@ -10426,7 +10426,7 @@ ScrollFrameMorph.prototype.adjustScrollBars = function () {
 
     this.changed();
     if (this.contents.width() > this.width() +
-            MorphicPreferences.scrollBarSize) {
+        MorphicPreferences.scrollBarSize) {
         this.hBar.show();
         if (this.hBar.width() !== hWidth) {
             this.hBar.setWidth(hWidth);
@@ -10449,7 +10449,7 @@ ScrollFrameMorph.prototype.adjustScrollBars = function () {
     }
 
     if (this.contents.height() > this.height() +
-            this.scrollBarSize) {
+        this.scrollBarSize) {
         this.vBar.show();
         if (this.vBar.height() !== vHeight) {
             this.vBar.setHeight(vHeight);
@@ -10562,8 +10562,8 @@ ScrollFrameMorph.prototype.mouseDownLeft = function (pos) {
     this.step = function () {
         var newPos;
         if (hand.mouseButton &&
-                (hand.children.length === 0) &&
-                (myself.bounds.containsPoint(hand.bounds.origin))) {
+            (hand.children.length === 0) &&
+            (myself.bounds.containsPoint(hand.bounds.origin))) {
 
             if (hand.grabPosition &&
                 (hand.grabPosition.distanceTo(hand.position()) <=
@@ -10589,7 +10589,7 @@ ScrollFrameMorph.prototype.mouseDownLeft = function (pos) {
                 };
             } else {
                 if ((Math.abs(deltaX) < 0.5) &&
-                        (Math.abs(deltaY) < 0.5)) {
+                    (Math.abs(deltaY) < 0.5)) {
                     myself.step = function () {
                         nop();
                     };
@@ -10624,8 +10624,8 @@ ScrollFrameMorph.prototype.startAutoScrolling = function () {
         pos = hand.bounds.origin;
         inner = myself.bounds.insetBy(inset);
         if ((myself.bounds.containsPoint(pos)) &&
-                (!(inner.containsPoint(pos))) &&
-                (hand.children.length > 0)) {
+            (!(inner.containsPoint(pos))) &&
+            (hand.children.length > 0)) {
             myself.autoScroll(pos);
         } else {
             myself.step = function () {
@@ -10747,26 +10747,26 @@ ListMorph.prototype.constructor = ListMorph;
 ListMorph.uber = ScrollFrameMorph.prototype;
 
 function ListMorph(elements, labelGetter, format, doubleClickAction) {
-/*
-    passing a format is optional. If the format parameter is specified
-    it has to be of the following pattern:
-
-        [
-            [<color>, <single-argument predicate>],
-            ['bold', <single-argument predicate>],
-            ['italic', <single-argument predicate>],
-            ...
-        ]
-
-    multiple conditions can be passed in such a format list, the
-    last predicate to evaluate true when given the list element sets
-    the given format category (color, bold, italic).
-    If no condition is met, the default format (color black, non-bold,
-    non-italic) will be assigned.
-
-    An example of how to use fomats can be found in the InspectorMorph's
-    "markOwnProperties" mechanism.
-*/
+    /*
+        passing a format is optional. If the format parameter is specified
+        it has to be of the following pattern:
+    
+            [
+                [<color>, <single-argument predicate>],
+                ['bold', <single-argument predicate>],
+                ['italic', <single-argument predicate>],
+                ...
+            ]
+    
+        multiple conditions can be passed in such a format list, the
+        last predicate to evaluate true when given the list element sets
+        the given format category (color, bold, italic).
+        If no condition is met, the default format (color black, non-bold,
+        non-italic) will be assigned.
+    
+        An example of how to use fomats can be found in the InspectorMorph's
+        "markOwnProperties" mechanism.
+    */
     this.init(
         elements || [],
         labelGetter || function (element) {
@@ -10853,7 +10853,7 @@ ListMorph.prototype.buildListContents = function () {
 };
 
 ListMorph.prototype.select = function (item, trigger) {
-    if (isNil(item)) {return; }
+    if (isNil(item)) { return; }
     this.selected = item;
     this.active = trigger;
     if (this.action) {
@@ -10882,7 +10882,7 @@ ListMorph.prototype.activeIndex = function () {
 
 ListMorph.prototype.activateIndex = function (idx) {
     var item = this.listContents.children[idx];
-    if (!item) {return; }
+    if (!item) { return; }
     item.image = item.pressImage;
     item.changed();
     item.trigger();
@@ -11048,11 +11048,11 @@ BouncerMorph.prototype.step = function () {
                 this.moveUp();
             }
             if (this.fullBounds().top() < this.parent.top() &&
-                    this.direction === 'up') {
+                this.direction === 'up') {
                 this.direction = 'down';
             }
             if (this.fullBounds().bottom() > this.parent.bottom() &&
-                    this.direction === 'down') {
+                this.direction === 'down') {
                 this.direction = 'up';
             }
         } else if (this.type === 'horizontal') {
@@ -11062,11 +11062,11 @@ BouncerMorph.prototype.step = function () {
                 this.moveLeft();
             }
             if (this.fullBounds().left() < this.parent.left() &&
-                    this.direction === 'left') {
+                this.direction === 'left') {
                 this.direction = 'right';
             }
             if (this.fullBounds().right() > this.parent.right() &&
-                    this.direction === 'right') {
+                this.direction === 'right') {
                 this.direction = 'left';
             }
         }
@@ -11162,7 +11162,7 @@ HandMorph.prototype.grab = function (aMorph) {
         this.world.stopEditing();
         this.grabOrigin = aMorph.situation();
         if (!(aMorph instanceof MenuMorph)) {
-        	aMorph.addShadow();
+            aMorph.addShadow();
         }
         if (aMorph.prepareToBeGrabbed) {
             aMorph.prepareToBeGrabbed(this);
@@ -11189,7 +11189,7 @@ HandMorph.prototype.drop = function () {
         morphToDrop.cachedFullBounds = null;
         morphToDrop.changed();
         if (!(morphToDrop instanceof MenuMorph)) {
-	        morphToDrop.removeShadow();
+            morphToDrop.removeShadow();
         }
         this.children = [];
         this.setExtent(new Point());
@@ -11233,9 +11233,9 @@ HandMorph.prototype.processMouseDown = function (event) {
         morph = this.morphAtPointer();
         if (this.world.activeMenu) {
             if (!contains(
-                    morph.allParents(),
-                    this.world.activeMenu
-                )) {
+                morph.allParents(),
+                this.world.activeMenu
+            )) {
                 this.world.activeMenu.destroy();
             } else {
                 clearInterval(this.touchHoldTimeout);
@@ -11276,15 +11276,15 @@ HandMorph.prototype.processTouchStart = function (event) {
     if (event.touches.length === 1) {
         this.touchHoldTimeout = setInterval( // simulate mouseRightClick
             function () {
-                myself.processMouseDown({button: 2});
-                myself.processMouseUp({button: 2});
+                myself.processMouseDown({ button: 2 });
+                myself.processMouseUp({ button: 2 });
                 event.preventDefault();
                 clearInterval(myself.touchHoldTimeout);
             },
             400
         );
         this.processMouseMove(event.touches[0]); // update my position
-        this.processMouseDown({button: 0});
+        this.processMouseDown({ button: 0 });
         event.preventDefault();
     }
 };
@@ -11302,7 +11302,7 @@ HandMorph.prototype.processTouchEnd = function (event) {
     MorphicPreferences.isTouchDevice = true;
     clearInterval(this.touchHoldTimeout);
     nop(event);
-    this.processMouseUp({button: 0});
+    this.processMouseUp({ button: 0 });
 };
 
 HandMorph.prototype.processMouseUp = function () {
@@ -11323,7 +11323,7 @@ HandMorph.prototype.processMouseUp = function () {
                 context = morph;
                 contextMenu = context.contextMenu();
                 while ((!contextMenu) &&
-                        context.parent) {
+                    context.parent) {
                     context = context.parent;
                     contextMenu = context.contextMenu();
                 }
@@ -11388,13 +11388,13 @@ HandMorph.prototype.processMouseMove = function (event) {
 
         // if a morph is marked for grabbing, just grab it
         if (this.mouseButton === 'left' &&
-                this.morphToGrab &&
-                (this.grabPosition.distanceTo(this.bounds.origin) >
-                    MorphicPreferences.grabThreshold)) {
+            this.morphToGrab &&
+            (this.grabPosition.distanceTo(this.bounds.origin) >
+                MorphicPreferences.grabThreshold)) {
             this.setPosition(this.grabPosition);
             if (this.morphToGrab.isDraggable) {
                 morph = this.morphToGrab.selectForEdit ?
-                        this.morphToGrab.selectForEdit() : this.morphToGrab;
+                    this.morphToGrab.selectForEdit() : this.morphToGrab;
                 this.grab(morph);
             } else if (this.morphToGrab.isTemplate) {
                 this.world.stopEditing();
@@ -11434,14 +11434,14 @@ HandMorph.prototype.processMouseMove = function (event) {
         // autoScrolling support:
         if (myself.children.length > 0) {
             if (newMorph instanceof ScrollFrameMorph &&
-                    newMorph.enableAutoScrolling &&
-                    newMorph.contents.allChildren().some(function (any) {
-                        return any.wantsDropOf(myself.children[0]);
-                    })
+                newMorph.enableAutoScrolling &&
+                newMorph.contents.allChildren().some(function (any) {
+                    return any.wantsDropOf(myself.children[0]);
+                })
             ) {
                 if (!newMorph.bounds.insetBy(
-                        MorphicPreferences.scrollBarSize * 3
-                    ).containsPoint(myself.bounds.origin)) {
+                    MorphicPreferences.scrollBarSize * 3
+                ).containsPoint(myself.bounds.origin)) {
                     newMorph.startAutoScrolling();
                 }
             }
@@ -11455,25 +11455,25 @@ HandMorph.prototype.processMouseScroll = function (event) {
     while (morph && !morph.mouseScroll) {
         morph = morph.parent;
     }
-    if (morph) {
-        var x = event.deltaX;
-        var y = event.deltaY;
-        if (event.shiftKey && event.deltaX === 0) {
-            // Scroll horizontally (based on vertical scroll delta). This is
-            // needed for some browser/system combinations which do not set
-            // deltaX.
-            x = y;
-            y = 0; // Don't scroll vertically.
-        }
+    if (!morph) { return; }
 
-        // Multiplier variable, to account for both pixel and line deltaModes.
-        var multiplier = event.deltaMode === 0x1 ? -1/3 : -1/53;
-
-        morph.mouseScroll(
-            y * multiplier,
-            x * multiplier
-        );
+    var x = event.deltaX;
+    var y = event.deltaY;
+    if (event.shiftKey && event.deltaX === 0) {
+        // Scroll horizontally (based on vertical scroll delta). This is
+        // needed for some browser/system combinations which do not set
+        // deltaX.
+        x = y;
+        y = 0; // Don't scroll vertically.
     }
+
+    // Multiplier variable, to account for both pixel and line deltaModes.
+    var multiplier = event.deltaMode === 0x1 ? -1 / 3 : -1 / 53;
+
+    morph.mouseScroll(
+        y * multiplier,
+        x * multiplier
+    );
 };
 
 /*
@@ -11486,25 +11486,25 @@ HandMorph.prototype.processMouseScroll = function (event) {
 */
 
 HandMorph.prototype.processDrop = function (event) {
-/*
-    find out whether an external image or audio file was dropped
-    onto the world canvas, turn it into an offscreen canvas or audio
-    element and dispatch the
-
-        droppedImage(canvas, name)
-        droppedSVG(image, name)
-        droppedAudio(audio, name)
-        droppedText(text, name, type)
-
-    events to interested Morphs at the mouse pointer
-*/
+    /*
+        find out whether an external image or audio file was dropped
+        onto the world canvas, turn it into an offscreen canvas or audio
+        element and dispatch the
+    
+            droppedImage(canvas, name)
+            droppedSVG(image, name)
+            droppedAudio(audio, name)
+            droppedText(text, name, type)
+    
+        events to interested Morphs at the mouse pointer
+    */
     var files = event instanceof FileList ? event
-                : event.target.files || event.dataTransfer.files,
+        : event.target.files || event.dataTransfer.files,
         file,
         url = event.dataTransfer ?
-                event.dataTransfer.getData('URL') : null,
+            event.dataTransfer.getData('URL') : null,
         txt = event.dataTransfer ?
-                event.dataTransfer.getData('Text/HTML') : null,
+            event.dataTransfer.getData('Text/HTML') : null,
         suffix,
         src,
         target = this.morphAtPointer(),
@@ -11601,7 +11601,7 @@ HandMorph.prototype.processDrop = function (event) {
             idx,
             c,
             start = html.indexOf('<img src="');
-        if (start === -1) {return null; }
+        if (start === -1) { return null; }
         start += 10;
         for (idx = start; idx < html.length; idx += 1) {
             c = html[idx];
@@ -11620,16 +11620,16 @@ HandMorph.prototype.processDrop = function (event) {
                 file.name.lastIndexOf('.') + 1
             ).toLowerCase();
             if (file.type.indexOf("svg") !== -1
-                    && !MorphicPreferences.rasterizeSVGs) {
+                && !MorphicPreferences.rasterizeSVGs) {
                 readSVG(file);
             } else if (file.type.indexOf("image") === 0) {
                 readImage(file);
             } else if (file.type.indexOf("audio") === 0) {
                 readAudio(file);
             } else if ((file.type.indexOf("text") === 0) ||
-                    contains(['txt', 'csv', 'json'], suffix)) {
-                    // check the file-extension because Windows
-                    // doesn't specify CSVs to be text/csv, sigh
+                contains(['txt', 'csv', 'json'], suffix)) {
+                // check the file-extension because Windows
+                // doesn't specify CSVs to be text/csv, sigh
                 readText(file);
             } else { // assume it's meant to be binary
                 readBinary(file);
@@ -11686,23 +11686,23 @@ HandMorph.prototype.processDrop = function (event) {
             target.droppedImage(canvas);
         };
         src = parseImgURL(txt);
-        if (src) {img.src = src; }
+        if (src) { img.src = src; }
     }
 };
 
 // HandMorph tools
 
 HandMorph.prototype.destroyTemporaries = function () {
-/*
-    temporaries are just an array of morphs which will be deleted upon
-    the next mouse click, or whenever another temporary Morph decides
-    that it needs to remove them. The primary purpose of temporaries is
-    to display tools tips of speech bubble help.
-*/
+    /*
+        temporaries are just an array of morphs which will be deleted upon
+        the next mouse click, or whenever another temporary Morph decides
+        that it needs to remove them. The primary purpose of temporaries is
+        to display tools tips of speech bubble help.
+    */
     var myself = this;
     this.temporaries.forEach(function (morph) {
         if (!(morph.isClickable
-                && morph.bounds.containsPoint(myself.position()))) {
+            && morph.bounds.containsPoint(myself.position()))) {
             morph.destroy();
             myself.temporaries.splice(myself.temporaries.indexOf(morph), 1);
         }
@@ -11741,7 +11741,7 @@ WorldMorph.prototype.init = function (aCanvas, fillPage) {
 
     // additional properties:
     this.stamp = Date.now(); // reference in multi-world setups
-    while (this.stamp === Date.now()) {nop(); }
+    while (this.stamp === Date.now()) { nop(); }
     this.stamp = Date.now();
 
     this.useFillPage = fillPage;
@@ -11789,7 +11789,7 @@ WorldMorph.prototype.updateBroken = function () {
 };
 
 WorldMorph.prototype.stepAnimations = function () {
-    this.animations.forEach(function (anim) {anim.step(); });
+    this.animations.forEach(function (anim) { anim.step(); });
     this.animations = this.animations.filter(function (anim) {
         return anim.isActive;
     });
@@ -11804,7 +11804,7 @@ WorldMorph.prototype.condenseDamages = function () {
         src.forEach(function (rect) {
             hit = detect(
                 trgt,
-                function (each) {return each.isNearTo(rect, 20); }
+                function (each) { return each.isNearTo(rect, 20); }
             );
             if (hit) {
                 hit.mergeWith(rect);
@@ -11868,19 +11868,19 @@ WorldMorph.prototype.fillPage = function () {
 WorldMorph.prototype.getGlobalPixelColor = function (point) {
     // answer the color at the given point.
 
-/*
-    // original method, now deprecated as of 4/4/2017 because Chrome
-    // "taints" the on-screen canvas as soon as its image data is
-    // requested, significantly slowing down subsequent blittings
-
-    var dta = this.worldCanvas.getContext('2d').getImageData(
-        point.x,
-        point.y,
-        1,
-        1
-    ).data;
-    return new Color(dta[0], dta[1], dta[2]);
-*/
+    /*
+        // original method, now deprecated as of 4/4/2017 because Chrome
+        // "taints" the on-screen canvas as soon as its image data is
+        // requested, significantly slowing down subsequent blittings
+    
+        var dta = this.worldCanvas.getContext('2d').getImageData(
+            point.x,
+            point.y,
+            1,
+            1
+        ).data;
+        return new Color(dta[0], dta[1], dta[2]);
+    */
 
     var clr = this.topMorphAt(point).getPixelColor(point);
     // IMPORTANT:
@@ -11900,7 +11900,7 @@ WorldMorph.prototype.initVirtualKeyboard = function () {
         this.virtualKeyboard = null;
     }
     if (!MorphicPreferences.isTouchDevice
-            || !MorphicPreferences.useVirtualKeyboard) {
+        || !MorphicPreferences.useVirtualKeyboard) {
         return;
     }
     this.virtualKeyboard = document.createElement("input");
@@ -12068,7 +12068,7 @@ WorldMorph.prototype.initEventListeners = function () {
                 event.preventDefault();
             }
             if ((event.ctrlKey && (!event.altKey) || event.metaKey) &&
-                    (event.keyCode !== 86)) { // allow pasting-in
+                (event.keyCode !== 86)) { // allow pasting-in
                 event.preventDefault();
             }
         },
@@ -12321,8 +12321,8 @@ WorldMorph.prototype.userCreateMorph = function () {
         create(new SliderMorph());
     });
     menu.addItem('dial', function () {
-    	newMorph = new DialMorph();
-     	newMorph.pickUp(this);
+        newMorph = new DialMorph();
+        newMorph.pickUp(this);
     });
     menu.addItem('frame', function () {
         newMorph = new FrameMorph();
@@ -12348,20 +12348,20 @@ WorldMorph.prototype.userCreateMorph = function () {
     menu.addItem('text', function () {
         newMorph = new TextMorph(
             "Ich wei\u00DF nicht, was soll es bedeuten, dass ich so " +
-                "traurig bin, ein M\u00E4rchen aus uralten Zeiten, das " +
-                "kommt mir nicht aus dem Sinn. Die Luft ist k\u00FChl " +
-                "und es dunkelt, und ruhig flie\u00DFt der Rhein; der " +
-                "Gipfel des Berges funkelt im Abendsonnenschein. " +
-                "Die sch\u00F6nste Jungfrau sitzet dort oben wunderbar, " +
-                "ihr gold'nes Geschmeide blitzet, sie k\u00E4mmt ihr " +
-                "goldenes Haar, sie k\u00E4mmt es mit goldenem Kamme, " +
-                "und singt ein Lied dabei; das hat eine wundersame, " +
-                "gewalt'ge Melodei. Den Schiffer im kleinen " +
-                "Schiffe, ergreift es mit wildem Weh; er schaut " +
-                "nicht die Felsenriffe, er schaut nur hinauf in " +
-                "die H\u00F6h'. Ich glaube, die Wellen verschlingen " +
-                "am Ende Schiffer und Kahn, und das hat mit ihrem " +
-                "Singen, die Loreley getan."
+            "traurig bin, ein M\u00E4rchen aus uralten Zeiten, das " +
+            "kommt mir nicht aus dem Sinn. Die Luft ist k\u00FChl " +
+            "und es dunkelt, und ruhig flie\u00DFt der Rhein; der " +
+            "Gipfel des Berges funkelt im Abendsonnenschein. " +
+            "Die sch\u00F6nste Jungfrau sitzet dort oben wunderbar, " +
+            "ihr gold'nes Geschmeide blitzet, sie k\u00E4mmt ihr " +
+            "goldenes Haar, sie k\u00E4mmt es mit goldenem Kamme, " +
+            "und singt ein Lied dabei; das hat eine wundersame, " +
+            "gewalt'ge Melodei. Den Schiffer im kleinen " +
+            "Schiffe, ergreift es mit wildem Weh; er schaut " +
+            "nicht die Felsenriffe, er schaut nur hinauf in " +
+            "die H\u00F6h'. Ich glaube, die Wellen verschlingen " +
+            "am Ende Schiffer und Kahn, und das hat mit ihrem " +
+            "Singen, die Loreley getan."
         );
         newMorph.isEditable = true;
         newMorph.maxWidth = 300;
@@ -12490,10 +12490,10 @@ WorldMorph.prototype.about = function () {
 
     this.inform(
         'morphic.js\n\n' +
-            'a lively Web GUI\ninspired by Squeak\n' +
-            morphicVersion +
-            '\n\nwritten by Jens M\u00F6nig\njens@moenig.org' +
-            versions
+        'a lively Web GUI\ninspired by Squeak\n' +
+        morphicVersion +
+        '\n\nwritten by Jens M\u00F6nig\njens@moenig.org' +
+        versions
     );
 };
 
@@ -12512,7 +12512,7 @@ WorldMorph.prototype.edit = function (aStringOrTextMorph) {
 
     this.initVirtualKeyboard();
     if (MorphicPreferences.isTouchDevice
-            && MorphicPreferences.useVirtualKeyboard) {
+        && MorphicPreferences.useVirtualKeyboard) {
         this.virtualKeyboard.style.top = this.cursor.top() + pos.y + "px";
         this.virtualKeyboard.style.left = this.cursor.left() + pos.x + "px";
         this.virtualKeyboard.focus();
@@ -12579,7 +12579,7 @@ WorldMorph.prototype.stopEditing = function () {
         this.cursor = null;
     }
     if (this.keyboardReceiver && this.keyboardReceiver.stopEditing) {
-    	this.keyboardReceiver.stopEditing();
+        this.keyboardReceiver.stopEditing();
     }
     this.keyboardReceiver = null;
     if (this.virtualKeyboard) {
