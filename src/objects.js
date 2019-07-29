@@ -1036,7 +1036,7 @@ SpriteMorph.prototype.initBlocks = function () {
         reifyReporter: {
             type: 'ring',
             category: 'other',
-            spec: '%rr %ringparms',
+            spec: '%ringparms $nl %rr',
             alias: 'reporter ring lambda'
         },
         reifyPredicate: {
@@ -2730,7 +2730,7 @@ SpriteMorph.prototype.freshPalette = function (category) {
     palette.growth = new Point(0, MorphicPreferences.scrollBarSize);
 
     // toolbar:
-    
+
     palette.toolBar = new AlignmentMorph('column');
 
     searchButton = new PushButtonMorph(

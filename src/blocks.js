@@ -885,7 +885,7 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
             part = new RingMorph();
             part.color = SpriteMorph.prototype.blockColor.other;
             part.selector = 'reifyReporter';
-            part.setSpec('%rr %ringparms');
+            part.setSpec('%ringparms %rr');
             part.isDraggable = true;
             part.isStatic = true;
             break;
@@ -3876,7 +3876,7 @@ BlockMorph.prototype.eraseHoles = function (context) {
         gradient,
         rightX,
         holes = [];
-    
+
     this.parts().forEach(function (part) {
         if (part.isHole) {
             holes.push(part);
