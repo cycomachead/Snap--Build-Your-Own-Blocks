@@ -974,6 +974,25 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                 true // read-only
             );
             break;
+        case '%mediaType': // audio/video selector
+            part = new InputSlotMorph(
+                null, // text
+                false, // numeric?
+                {
+                    'audio' : ['audio'],
+                    'video' : ['video'],
+                },
+                true // read-only
+            );
+            break;
+        case '%mediaDeviceMenu':
+            part = new InputSlotMorph(
+                null, // text
+                false, // numeric?
+                'mediaDeviceMenu',
+                true // read-only
+            );
+            break;
         case '%img': // image attributes
             part = new InputSlotMorph(
                 null, // text
@@ -9253,6 +9272,17 @@ InputSlotMorph.prototype.audioMenu = function () {
     }
     return dict;
 };
+
+InputSlotMorph.prototype.mediaDeviceMenu = function () {
+    let dict = {},
+        deviceType = false ? 'audiodevice' : 'videodevice';
+        // TODO get argument 1 to block.
+    // TODO: How does this work with a promise?
+    navigator.mediaDevices.enumerateDevices().then(() => {
+
+    });
+    return dict;
+}
 
 InputSlotMorph.prototype.setChoices = function (dict, readonly) {
     // externally specify choices and read-only status,
