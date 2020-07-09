@@ -25,7 +25,9 @@
         <script src="src/api.js?version=2020-07-06"></script>
         <script src="src/sha512.js?version=2019-06-27"></script>
         <script src="src/FileSaver.min.js?version=2019-06-27"></script>
+        <script src="src/sentry.min.js?version=2020-07-10"></script>
         <script>
+            Sentry.init({ dsn: 'https://980dd4ac6b8949e88c8e04b83b2981ca@sentry.cs10.org/9' });
             var world;
             window.onload = function () {
                 world = new WorldMorph(document.getElementById('world'));
