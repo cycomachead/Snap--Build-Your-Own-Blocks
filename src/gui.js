@@ -346,6 +346,7 @@ IDE_Morph.prototype.openIn = function (world) {
             }
             throw new Error('unable to retrieve ' + url);
         } catch (err) {
+            Sentry.captureException(err);
             myself.showMessage('unable to retrieve project');
             return '';
         }
@@ -2298,6 +2299,7 @@ IDE_Morph.prototype.refreshIDE = function () {
         try {
             projectData = this.serializer.serialize(this.stage);
         } catch (err) {
+            Sentry.captureException(err);
             this.showMessage('Serialization failed: ' + err);
         }
     } else {
@@ -4195,6 +4197,7 @@ IDE_Morph.prototype.exportProject = function (name, plain) {
             menu.destroy();
             this.showMessage('Exported!', 1);
         } catch (err) {
+            Sentry.captureException(err);
             if (Process.prototype.isCatchingErrors) {
                 this.showMessage('Export failed: ' + err);
             } else {
@@ -4626,6 +4629,7 @@ IDE_Morph.prototype.rawOpenProjectString = function (str) {
                 this
             );
         } catch (err) {
+            Sentry.captureException(err);
             this.showMessage('Load failed: ' + err);
         }
     } else {
@@ -4672,6 +4676,7 @@ IDE_Morph.prototype.rawOpenCloudDataString = function (str) {
                 this
             );
         } catch (err) {
+            Sentry.captureException(err);
             this.showMessage('Load failed: ' + err);
         }
     } else {
@@ -4707,6 +4712,7 @@ IDE_Morph.prototype.rawOpenBlocksString = function (str, name, silently) {
         try {
             blocks = this.serializer.loadBlocks(str, this.stage);
         } catch (err) {
+            Sentry.captureException(err);
             this.showMessage('Load failed: ' + err);
         }
     } else {
@@ -4745,6 +4751,7 @@ IDE_Morph.prototype.rawOpenSpritesString = function (str) {
         try {
             this.serializer.loadSprites(str, this);
         } catch (err) {
+            Sentry.captureException(err);
             this.showMessage('Load failed: ' + err);
         }
     } else {
@@ -4757,6 +4764,7 @@ IDE_Morph.prototype.openMediaString = function (str) {
         try {
             this.serializer.loadMedia(str);
         } catch (err) {
+            Sentry.captureException(err);
             this.showMessage('Load failed: ' + err);
         }
     } else {
@@ -4786,6 +4794,7 @@ IDE_Morph.prototype.rawOpenScriptString = function (str) {
             xml = this.serializer.parse(str, this.currentSprite);
             script = this.serializer.loadScript(xml, this.currentSprite);
         } catch (err) {
+            Sentry.captureException(err);
             this.showMessage('Load failed: ' + err);
         }
     } else {
@@ -5102,6 +5111,7 @@ IDE_Morph.prototype.toggleDynamicInputLabels = function () {
         try {
             projectData = this.serializer.serialize(this.stage);
         } catch (err) {
+            Sentry.captureException(err);
             this.showMessage('Serialization failed: ' + err);
         }
     } else {
@@ -5467,6 +5477,7 @@ IDE_Morph.prototype.reflectLanguage = function (lang, callback, noSave) {
             try {
                 projectData = this.serializer.serialize(this.stage);
             } catch (err) {
+                Sentry.captureException(err);
                 this.showMessage('Serialization failed: ' + err);
             }
         } else {
@@ -5573,6 +5584,7 @@ IDE_Morph.prototype.setBlocksScale = function (num) {
         try {
             projectData = this.serializer.serialize(this.stage);
         } catch (err) {
+            Sentry.captureException(err);
             this.showMessage('Serialization failed: ' + err);
         }
     } else {
@@ -5898,6 +5910,7 @@ IDE_Morph.prototype.verifyProject = function (body) {
     try {
         this.serializer.parse(body.xml);
     } catch (err) {
+        Sentry.captureException(err);
         this.showMessage('Serialization of program data failed:\n' + err);
         return false;
     }
@@ -5905,6 +5918,7 @@ IDE_Morph.prototype.verifyProject = function (body) {
         try {
             this.serializer.parse(body.media);
         } catch (err) {
+            Sentry.captureException(err);
             this.showMessage('Serialization of media failed:\n' + err);
             return false;
         }
@@ -5951,6 +5965,7 @@ IDE_Morph.prototype.exportProjectMedia = function (name) {
         } catch (err) {
             if (Process.prototype.isCatchingErrors) {
                 this.serializer.isCollectingMedia = false;
+                Sentry.captureException(err);
                 this.showMessage('Export failed: ' + err);
             } else {
                 throw err;
@@ -9878,7 +9893,7 @@ SoundRecorderDialogMorph.prototype.buildContents = function () {
                 audio: {
                     channelCount: 1 // force mono, currently only works on FF
                 }
-                
+
             }
         ).then(stream => {
             this.mediaRecorder = new MediaRecorder(stream);
