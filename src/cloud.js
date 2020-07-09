@@ -276,7 +276,11 @@ Cloud.prototype.checkCredentials = function (onSuccess, onError, response) {
                 myself.verified = user.verified;
             }
             if (onSuccess) {
-            	onSuccess.call(
+                if (Sentry) {
+                    Sentry.setUser({ 'id': user.id, 'username': user.username});
+                    Sentry.setContext('user_info', { verified: user.verified, role: user.role});
+                }
+                onSuccess.call(
                     null,
                     user.username,
                     user.role,
@@ -313,7 +317,12 @@ Cloud.prototype.logout = function (onSuccess, onError) {
     this.request(
         'POST',
         '/logout',
-        onSuccess,
+        () => {
+            if (Sentry) {
+                Sentry.setUser({ 'id': null, 'username': null});
+            }
+            onSuccess.call(null);
+        },
         onError,
         'logout failed'
     );
