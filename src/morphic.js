@@ -886,7 +886,7 @@
 
     it renders the morph as a solid rectangle completely filling its
     area with its current color.
-    
+
     Notice how the coordinates for the fillRect() call are relative
     to the morph's own position: The rendered rectangle's origin is always
     located at (0, 0) regardless of the morph's actual position in the World.
@@ -897,20 +897,20 @@
     If your new morph also needs to determine its extent and, e.g. to
     encompass one or several other morphs, or arrange the layout of its
     submorphs, make sure to also override the default
-    
+
         fixLayout()
-    
+
     method.
-    
+
     NOTE: If you need to set the morph's extent inside, in order to avoid
     infinite recursion instead of calling morph.setExtent() - which will
     in turn call morph.fixLayout() again - directly modify the morph's
-    
+
         bounds
 
     property. Bounds is a rectable on which you can also use the same
     size-setters, e.g. by calling:
-    
+
         this.bounds.setExtent()
 
 
@@ -919,9 +919,9 @@
     In case your new morph needs to support pixel-perfect collision detection
     with other morphs or pointing devices such as the mouse or a stylus you
     can set the inherited attribute
-    
+
         isFreeForm = bool
-    
+
     to "true" (default is "false"). This makes sense the more your morph's
     visual shape diverges from a rectangle. For example, if you create a
     circular filled morph the default setting will register mouse-events
@@ -944,14 +944,14 @@
     cache your morph's current shape, so it doesn't have to be re-drawn onto a
     new Canvas element every time the mouse moves over its bounding box.
     For this you can set then inherited
-    
+
         isCachingImage = bool
-        
+
     attribute to "true" instead of the default "false" value. This will
     significantly speed up collision detection and smoothen animations that
     continuously perform collision detection. However, it will also consume
     more memory. Therefore it's best to use this setting with caution.
-    
+
     Snap! caches the shapes of sprites but not those of blocks. Instead it
     manages the insides of C- and E-shaped blocks through the morphic "holes"
     mechanism.
@@ -965,20 +965,20 @@
     registered.
 
     By default the inherited
-    
+
         holes = []
 
     property is an empty array. You can add one or more morphic Rectangle
     objects to this list, representing regions, in which occurring events will
     instead be passed on to the morph underneath.
-    
+
     Note that, same with the render() method, the coordinates of these
     rectangular holes must be specified relative to your morph's position.
 
     If you specify holes you might find the need to adjust their layout
     depending on the layout of your morph. To accomplish this you can override
     the inherited
-    
+
         fixHolesLayout()
 
     method.
@@ -992,13 +992,13 @@
     on a touch screen device, or you want the user to be able to "pinch" or
     otherwise distort a shape interactively. In all of these situations you'll
     want your morph to frequently rerender its shape.
-    
+
     You can accomplish this, by calling
 
         rerender()
 
     after every change to your morph's appearance that requires rerendering.
-    
+
     Such changes are usually only happening when the morph's dimensions or
     other visual properties - such as its color - changes.
 
@@ -1717,7 +1717,9 @@ function enableRetinaSupport() {
                 */
                 context.scale(pixelRatio, pixelRatio);
             } catch (err) {
-                console.log('Retina Display Support Problem', err);
+                if (Sentry) {
+                    Sentry.captureException(err);
+                }
                 uber.width.set.call(this, width);
             }
         }
@@ -4758,7 +4760,7 @@ HandleMorph.prototype.renderCrosshairsOn = function (ctx, fract) {
         false
     );
     ctx.fill();
-    
+
     // solid black ring
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 1;
@@ -5478,7 +5480,7 @@ CursorMorph.prototype.init = function (aStringOrTextMorph, aTextarea) {
     // override inherited defaults
     ls = fontHeight(this.target.fontSize);
     this.setExtent(new Point(Math.max(Math.floor(ls / 20), 1), ls));
-    
+
     if (this.target instanceof TextMorph &&
             (this.target.alignment !== 'left')) {
         this.target.setAlignmentToLeft();
@@ -5523,7 +5525,7 @@ CursorMorph.prototype.processKeyDown = function (event) {
         shift = event.shiftKey,
         singleLineText = this.target instanceof StringMorph,
         dest;
- 
+
     if (!isNil(this.target.receiver) && (event.ctrlKey || event.metaKey)) {
         if (keyName === 'd') {
             event.preventDefault();
@@ -5666,7 +5668,7 @@ CursorMorph.prototype.processInput = function (event) {
 CursorMorph.prototype.updateTextAreaPosition = function () {
     var pos = getDocumentPositionOf(this.target.world().worldCanvas),
         origin = this.target.bounds.origin.add(new Point(pos.x, pos.y));
- 
+
     function number2px (n) {
         return Math.ceil(n) + 'px';
     }
@@ -10129,7 +10131,7 @@ MenuItemMorph.prototype.popUpSubmenu = function () {
         scroller.setHeight(world.bottom() - scroller.top() - 6);
         scroller.adjustScrollBars(); // ?
      }
-    
+
     menu.add(this.action);
     menu.submenu = this.action;
     menu.submenu.world = menu.world; // keyboard control
@@ -11837,7 +11839,7 @@ WorldMorph.prototype.condenseDamages = function () {
     /* // overly eager reduction algorithm, commented out for performance
     var again = true,
         size = this.broken.length;
-    
+
     while (again) {
         this.broken = condense(this.broken);
         again = (this.broken.length < size);

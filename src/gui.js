@@ -5991,6 +5991,7 @@ IDE_Morph.prototype.exportProjectNoMedia = function (name) {
                 this.showMessage('Exported!', 1);
             } catch (err) {
                 this.serializer.isCollectingMedia = false;
+                Sentry.captureException(err);
                 this.showMessage('Export failed: ' + err);
             }
         } else {
@@ -6021,6 +6022,7 @@ IDE_Morph.prototype.exportProjectAsCloudData = function (name) {
                 this.showMessage('Exported!', 1);
             } catch (err) {
                 this.serializer.isCollectingMedia = false;
+                Sentry.captureException(err);
                 this.showMessage('Export failed: ' + err);
             }
         } else {
